@@ -2012,6 +2012,172 @@ API           → REST
 Deployment    → Vercel / Render / Railway
 ```
 
+---
+
+## 📁 Repository Architecture
+
+```text
+build2pitch/
+├── client/
+│   ├── public/                   # Static public assets (favicon.svg, etc.)
+│   ├── src/
+│   │   ├── assets/               # Local media and brand vectors
+│   │   ├── components/
+│   │   │   ├── ui/               # Atomic primitives (Button, Card, Badge, Input)
+│   │   │   ├── layout/           # Navbar, Sidebar, PageContainer, ProtectedRoute, LoadingScreen
+│   │   │   └── shared/           # Route PlaceholderView, Shared widgets
+│   │   ├── pages/
+│   │   │   ├── Landing/          # / (Public Landing & Event Playbook)
+│   │   │   ├── Auth/             # /login, /register, /member-login
+│   │   │   ├── Team/             # /team/dashboard, /team/members, /team/idea, /team/instructions, /team/submission
+│   │   │   ├── Member/           # /member/dashboard
+│   │   │   └── Admin/            # /admin/login, /admin/dashboard, /admin/teams, /admin/students, /admin/ideas, /admin/submissions
+│   │   ├── routes/               # Centralized React Router DOM definition
+│   │   ├── services/             # Axios API client (api.ts) with domain service wrappers
+│   │   ├── hooks/                # Custom hooks (useAuth)
+│   │   ├── context/              # React Context (AuthContext)
+│   │   ├── types/                # Shared TypeScript models (User, Team, Idea, Submission, etc.)
+│   │   ├── utils/                # Utility functions (cn styling helper)
+│   │   ├── lib/                  # Design tokens and theme values (tokens.ts)
+│   │   ├── App.tsx               # App root provider assembly
+│   │   └── main.tsx              # React DOM entrypoint
+│   ├── index.html
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── package.json
+│
+├── server/
+│   ├── src/
+│   │   ├── config/               # Database (db.js) & environment variables (env.js)
+│   │   ├── controllers/          # Business logic handlers (auth, team, idea, submission, admin)
+│   │   ├── middleware/           # auth, errorHandler, validate
+│   │   ├── models/               # Mongoose ODM schemas (User, Team, StartupIdea, Submission, EventSettings)
+│   │   ├── routes/               # Modular Express routers & index.js
+│   │   ├── services/             # Background logic & helper services
+│   │   ├── utils/                # Standardized API response formatters & logger
+│   │   ├── types/                # Domain models index & documentation
+│   │   └── app.js                # Express app configuration & server listener
+│   └── package.json
+│
+├── README.md
+├── .gitignore
+├── .env.example
+└── package.json
+```
+
+---
+
+## 🎨 Design System & Tokens
+
+The platform implements a **premium cinematic entrepreneurship aesthetic** (deep obsidian dark mode, glowing cyan and warm amber accents, subtle glassmorphism).
+
+Defined in [`client/src/lib/tokens.ts`](client/src/lib/tokens.ts) and configured in [`client/tailwind.config.js`](client/tailwind.config.js):
+
+| Token | Semantic Role | Value / Hex | Preview / Usage |
+| :--- | :--- | :--- | :--- |
+| `background` | Pitch Dark Canvas | `#090D16` | Main app background canvas |
+| `foreground` | Crisp Text | `#F8FAFC` | Primary readable typography |
+| `card` | Glassmorphic Slate | `#0F172A` | Elevated containers & dashboard tiles |
+| `border` | Luminescent Border | `#1E293B` | Subtle card & layout separators |
+| `primary` | Electric Cyan | `#06B6D4` | Primary brand accent & call-to-actions |
+| `accent` | Pitch Gold / Amber | `#F59E0B` | Badges, countdowns & milestones |
+| `danger` | Crimson Alert | `#EF4444` | Deadlines, errors, destructive alerts |
+| `success` | Launch Mint | `#10B981` | Verification, active status, completion |
+
+---
+
+## 🗺 Application Routes
+
+All 16 required route placeholders are fully configured and routed in [`client/src/routes/index.tsx`](client/src/routes/index.tsx):
+
+| Route | Module | Purpose |
+| :--- | :--- | :--- |
+| `/` | `Landing` | Event introduction, schedule, and team quick-start actions |
+| `/login` | `Auth` | Team Leader & User authentication |
+| `/register` | `Auth` | Team Leader sign up and new squad registration |
+| `/member-login` | `Auth` | Quick-pass login for 6-member team participants |
+| `/team/dashboard` | `Team` | Main command center for 6-member team |
+| `/team/members` | `Team` | 6-member roster management & role assignments |
+| `/team/idea` | `Team` | Reveal & view assigned startup idea and problem statement |
+| `/team/instructions` | `Team` | Event rules, judging rubric, and milestones |
+| `/team/submission` | `Team` | Final deliverable lock-in (live demo URL, pitch deck, GitHub) |
+| `/member/dashboard` | `Member` | Individual student participant workspace & tasks |
+| `/admin/login` | `Admin` | Restricted administrator authentication |
+| `/admin/dashboard` | `Admin` | Executive dashboard with event-wide analytics & controls |
+| `/admin/teams` | `Admin` | Directory of all competing teams & table assignments |
+| `/admin/students` | `Admin` | Roster of all student participants and skills |
+| `/admin/ideas` | `Admin` | Startup idea bank & auto-distribution controls |
+| `/admin/submissions` | `Admin` | Submissions pipeline, review console, and judging rubric |
+
+---
+
+## 📦 Shared TypeScript Data Models
+
+Defined in [`client/src/types/index.ts`](client/src/types/index.ts) and mirrored in [`server/src/models/`](server/src/models/):
+
+- `User`: Accounts (roles: `admin`, `team_lead`, `member`).
+- `Team`: 6-member squads, unique team codes, table numbers, submission and idea linkages.
+- `TeamMember`: Specific role allocations (`leader`, `developer`, `designer`, `pitcher`, `researcher`, `marketer`).
+- `StartupIdea`: Structured startup briefs (Problem, target demographic, feature set, revenue model).
+- `IdeaAssignment`: Team allocation tracking with reveal state controls.
+- `Submission`: Deliverable packages (Pitch deck, Live demo, GitHub repository, tech stack).
+- `EventSettings`: Global hackathon state, deadlines, team constraints, and event phases.
+
+---
+
+## ⚡ Getting Started
+
+### 1. Prerequisites
+- **Node.js** >= 18.0.0
+- **npm** >= 9.0.0
+- **MongoDB** (Local or MongoDB Atlas connection string)
+
+### 2. Installation
+Install all dependencies across the monorepo root, client, and server with one command:
+```bash
+npm run install:all
+```
+
+### 3. Environment Setup
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+*(Server and client default to port 5000 and 5173 respectively).*
+
+### 4. Running Locally
+Start both backend API and frontend Vite dev server concurrently:
+```bash
+npm run dev
+```
+
+Or run each independently:
+```bash
+# Terminal 1: Backend Express Server
+npm run dev:server
+
+# Terminal 2: Frontend Vite Client
+npm run dev:client
+```
+
+- **Frontend Client**: [http://localhost:5173](http://localhost:5173)
+- **Backend API**: [http://localhost:5000](http://localhost:5000)
+- **Health Check**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
+
+---
+
+## 🤝 Developer Contribution Guide
+
+1. **Modular Scope**: Keep components focused and under 250 lines.
+2. **Type Safety**: Always import types from `@/types`. Do not use `any`.
+3. **Design Tokens**: Always use predefined Tailwind tokens (`text-primary`, `bg-card`, `border-border`) rather than arbitrary colors.
+4. **API Calls**: Add endpoints to `client/src/services/api.ts` through `apiClient`.
+5. **Route Registration**: Connect new pages into `client/src/routes/index.tsx`.
+
+---
+
 ## License
 
 This project is created for the **BUILD2PITCH entrepreneurship event** and may be adapted for future student entrepreneurship challenges.
+
