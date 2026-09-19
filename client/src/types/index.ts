@@ -50,6 +50,8 @@ export type IdeaComplexity = 'beginner' | 'intermediate' | 'advanced';
 export interface StartupIdea {
   id: string;
   title: string;
+  shortDescription?: string;
+  category?: string;
   industry: string;
   problemStatement: string;
   targetAudience: string;
@@ -62,7 +64,36 @@ export interface StartupIdea {
 }
 
 // ==========================================
-// 4. Idea Assignment Types
+// 4. Idea Dice / Roll Flow Types
+// ==========================================
+
+export interface IdeaVault {
+  count: number;
+  ideas: StartupIdea[];
+}
+
+export type IdeaRollStatus = 'ROLLED' | 'LOCKED' | null;
+
+export interface MyIdeaState {
+  status: IdeaRollStatus;
+  attemptsUsed: number;
+  attemptsRemaining: number;
+  idea: StartupIdea | null;
+}
+
+export interface IdeaRollResult {
+  attempt: number;
+  attemptsRemaining: number;
+  idea: StartupIdea;
+}
+
+export interface LockedIdeaResult {
+  status: 'LOCKED';
+  idea: StartupIdea;
+}
+
+// ==========================================
+// 5. Idea Assignment Types
 // ==========================================
 
 export interface IdeaAssignment {
@@ -77,7 +108,7 @@ export interface IdeaAssignment {
 }
 
 // ==========================================
-// 5. Submission Types
+// 6. Submission Types
 // ==========================================
 
 export interface Submission {
@@ -102,7 +133,7 @@ export interface Submission {
 }
 
 // ==========================================
-// 6. Team Types
+// 7. Team Types
 // ==========================================
 
 export interface Team {
@@ -121,7 +152,7 @@ export interface Team {
 }
 
 // ==========================================
-// 7. Event Settings Types
+// 8. Event Settings Types
 // ==========================================
 
 export type EventPhase = 
@@ -146,7 +177,7 @@ export interface EventSettings {
 }
 
 // ==========================================
-// 8. API & Network Types
+// 9. API & Network Types
 // ==========================================
 
 export interface ApiResponse<T = unknown> {

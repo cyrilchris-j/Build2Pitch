@@ -1,5 +1,11 @@
 import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
-import type { ApiResponse } from '@/types';
+import type {
+  ApiResponse,
+  IdeaRollResult,
+  IdeaVault,
+  LockedIdeaResult,
+  MyIdeaState,
+} from '@/types';
 
 /**
  * Base API client configuration
@@ -14,12 +20,37 @@ export const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Request Interceptor: Attach JWT token when available
+const TEAM_KEY = 'build2pitch_team_id';
+const TEAM_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
+/**
+ * Stable client-side team identity used by the idea dice flow.
+ * Created once and persisted in localStorage.
+ */
+export function getTeamId(): string {
+  let id = localStorage.getItem(TEAM_KEY);
+  if (!id || !TEAM_ID_PATTERN.test(id)) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : fallbackUuid())
+      .replace(/-/g, '')
+      .slice(0, 16);
+    localStorage.setItem(TEAM_KEY, id);
+  }
+  return id;
+}
+
+function fallbackUuid(): string {
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`;
+}
+
+// Request Interceptor: Attach JWT token + team id when available
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('build2pitch_token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (config.headers) {
+      config.headers['x-team-id'] = getTeamId();
     }
     return config;
   },
@@ -87,6 +118,25 @@ export const teamService = {
   },
   getAssignedIdea: async () => {
     return apiClient.get('/teams/me/idea');
+  },
+};
+
+export const ideaRollService = {
+  getVault: async (): Promise<IdeaVault> => {
+    const res = await apiClient.get<ApiResponse<IdeaVault>>('/ideas/available');
+    return res.data.data as IdeaVault;
+  },
+  myIdea: async (): Promise<MyIdeaState> => {
+    const res = await apiClient.get<ApiResponse<MyIdeaState>>('/ideas/my-idea');
+    return res.data.data as MyIdeaState;
+  },
+  roll: async (): Promise<IdeaRollResult> => {
+    const res = await apiClient.post<ApiResponse<IdeaRollResult>>('/ideas/roll');
+    return res.data.data as IdeaRollResult;
+  },
+  lock: async (): Promise<LockedIdeaResult> => {
+    const res = await apiClient.post<ApiResponse<LockedIdeaResult>>('/ideas/lock');
+    return res.data.data as LockedIdeaResult;
   },
 };
 
