@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const apiRoutes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
+const { seedIfEmpty } = require('./services/seedService');
 
 const app = express();
 
@@ -52,7 +53,16 @@ app.use(errorHandler);
 
 // Start server if run directly
 if (require.main === module) {
-  connectDB().then(() => {
+  connectDB().then(async (conn) => {
+    if (conn) {
+      try {
+        const seeded = await seedIfEmpty();
+        if (seeded) logger.info('Seeded default startup ideas');
+      } catch (err) {
+        logger.warn(`Seed skipped: ${err.message}`);
+      }
+    }
+
     const server = app.listen(env.PORT, () => {
       logger.info(`🚀 BUILD2PITCH Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
       logger.info(`🔗 API Health: http://localhost:${env.PORT}/api/health`);
