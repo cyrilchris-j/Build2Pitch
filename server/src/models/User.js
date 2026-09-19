@@ -14,6 +14,16 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    registerNumber: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      unique: true,
+      sparse: true,
+    },
+    mobile: { type: String, trim: true },
+    gender: { type: String, enum: ['male', 'female'], lowercase: true },
+    section: { type: String, trim: true },
     password: {
       type: String,
       required: true,

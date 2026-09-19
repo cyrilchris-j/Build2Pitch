@@ -34,8 +34,12 @@ export type MemberSpecialization =
 export interface TeamMember {
   id: string;
   name: string;
+  registerNumber: string;
   email: string;
-  role: MemberSpecialization;
+  mobile: string;
+  gender: 'male' | 'female';
+  section: string;
+  role?: MemberSpecialization;
   isRegisteredUser?: boolean;
   userId?: string;
   joinedAt: string;
@@ -112,6 +116,9 @@ export interface Team {
   teamCode: string;
   leaderId: string;
   members: TeamMember[];
+  leader?: TeamMember;
+  membersCount?: number;
+  maxMembers?: number;
   ideaAssignment?: IdeaAssignment;
   submission?: Submission;
   isLocked: boolean;

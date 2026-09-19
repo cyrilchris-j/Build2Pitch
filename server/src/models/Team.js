@@ -2,12 +2,11 @@ const mongoose = require('mongoose');
 
 const teamMemberSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  registerNumber: { type: String, required: true, trim: true, uppercase: true },
   email: { type: String, required: true },
-  role: {
-    type: String,
-    enum: ['leader', 'developer', 'designer', 'pitcher', 'researcher', 'marketer'],
-    default: 'developer',
-  },
+  mobile: { type: String, required: true },
+  gender: { type: String, enum: ['male', 'female'], required: true },
+  section: { type: String, required: true, trim: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   joinedAt: { type: Date, default: Date.now },
 });
