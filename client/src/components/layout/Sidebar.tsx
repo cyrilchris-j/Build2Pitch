@@ -40,13 +40,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ type = 'team', className }) =>
   return (
     <aside
       className={cn(
-        'w-64 shrink-0 border-r border-border bg-card/40 backdrop-blur-md p-4 flex flex-col justify-between min-h-[calc(100vh-4rem)]',
+        'w-64 shrink-0 border-r border-[#242424] bg-[#070707] p-4 flex flex-col justify-between min-h-[calc(100vh-4rem)] text-[#FFFFFF]',
         className
       )}
     >
       <div className="space-y-6">
         <div className="px-3 py-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-foreground-subtle">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8A8A]">
             {type === 'team' ? 'Team Workspace' : 'Command Center'}
           </p>
         </div>
@@ -60,27 +60,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ type = 'team', className }) =>
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
+                    'flex items-center gap-3 px-3.5 h-11 rounded-lg text-sm font-medium transition-colors duration-150',
                     isActive
-                      ? 'bg-primary/15 text-primary border border-primary/30 shadow-glow-primary'
-                      : 'text-foreground-muted hover:text-foreground hover:bg-card/70'
+                      ? 'bg-[#111111] border border-[#242424] text-[#E63946]'
+                      : 'text-[#8A8A8A] hover:bg-[#111111] hover:text-[#FFFFFF]'
                   )
                 }
               >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span>{item.label}</span>
+                <Icon className="h-4 w-4 shrink-0 text-current" />
+                <span className="truncate">{item.label}</span>
               </NavLink>
             );
           })}
         </nav>
       </div>
 
-      <div className="rounded-xl border border-border/70 bg-card/60 p-3.5 text-xs text-foreground-subtle">
-        <div className="flex items-center justify-between mb-1.5 font-medium text-foreground-muted">
+      <div className="rounded-xl border border-[#242424] bg-[#111111] p-3.5 text-xs text-[#8A8A8A]">
+        <div className="flex items-center justify-between mb-1.5 font-medium text-[#FFFFFF]">
           <span>Sprint Status</span>
-          <span className="text-accent font-semibold">Active</span>
+          <span className="text-[#E63946] font-semibold">Active</span>
         </div>
-        <p className="leading-relaxed text-[11px]">
+        <p className="leading-relaxed text-[11px] text-[#8A8A8A]">
           6-member team incubator track. Deliverables close at event conclusion.
         </p>
       </div>

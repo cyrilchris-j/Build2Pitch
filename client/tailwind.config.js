@@ -9,40 +9,40 @@ export default {
     extend: {
       colors: {
         background: {
-          DEFAULT: '#090D16',
-          subtle: '#0D1424',
-          elevated: '#111A2E',
+          DEFAULT: '#070707',
+          subtle: '#0D0D0D',
+          elevated: '#111111',
         },
         foreground: {
-          DEFAULT: '#F8FAFC',
-          muted: '#94A3B8',
-          subtle: '#64748B',
+          DEFAULT: '#FFFFFF',
+          muted: '#8A8A8A',
+          subtle: '#5A5A5A',
         },
         card: {
-          DEFAULT: '#0F172A',
-          hover: '#131D35',
+          DEFAULT: '#111111',
+          hover: '#181818',
         },
         border: {
-          DEFAULT: '#1E293B',
-          hover: '#334155',
+          DEFAULT: '#242424',
+          hover: '#333333',
         },
         primary: {
-          DEFAULT: '#06B6D4',
-          hover: '#0891B2',
-          light: '#22D3EE',
+          DEFAULT: '#E63946',
+          hover: '#D62839',
+          light: '#FF4D5D',
         },
         accent: {
-          DEFAULT: '#F59E0B',
-          hover: '#D97706',
-          light: '#FBBF24',
+          DEFAULT: '#E63946',
+          hover: '#D62839',
+          light: '#FF4D5D',
         },
         danger: {
-          DEFAULT: '#EF4444',
-          hover: '#DC2626',
+          DEFAULT: '#E63946',
+          hover: '#D62839',
         },
         success: {
-          DEFAULT: '#10B981',
-          hover: '#059669',
+          DEFAULT: '#E63946',
+          hover: '#D62839',
         },
       },
       fontFamily: {
@@ -50,13 +50,13 @@ export default {
         display: ['Outfit', 'Inter', 'sans-serif'],
       },
       boxShadow: {
-        'glow-primary': '0 0 25px -5px rgba(6, 182, 212, 0.35)',
-        'glow-accent': '0 0 25px -5px rgba(245, 158, 11, 0.35)',
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'glow-primary': '0 0 25px -5px rgba(230, 57, 70, 0.35)',
+        'glow-accent': '0 0 25px -5px rgba(230, 57, 70, 0.35)',
+        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.5)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'cinematic-glow': 'radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.15), transparent 70%)',
+        'cinematic-glow': 'radial-gradient(circle at 50% 0%, rgba(230, 57, 70, 0.12), transparent 70%)',
       },
     },
   },

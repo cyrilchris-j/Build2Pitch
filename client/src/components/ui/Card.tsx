@@ -10,16 +10,15 @@ export const Card: React.FC<CardProps> = ({
   children,
   className,
   glow = 'none',
-  glass = true,
+  glass = false,
   ...props
 }) => {
   return (
     <div
       className={cn(
-        'rounded-xl border border-border p-6 transition-all duration-200',
-        glass ? 'glass-card' : 'bg-card',
-        glow === 'cyan' && 'glow-border-cyan',
-        glow === 'amber' && 'glow-border-amber',
+        'rounded-xl border border-[#242424] bg-[#111111] p-6 transition-all duration-200 text-[#FFFFFF]',
+        glow === 'cyan' && 'glow-border-red',
+        glow === 'amber' && 'glow-border-red',
         className
       )}
       {...props}

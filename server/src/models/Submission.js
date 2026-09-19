@@ -10,41 +10,58 @@ const submissionSchema = new mongoose.Schema(
     },
     startupName: {
       type: String,
-      required: true,
+      default: '',
       trim: true,
     },
     tagline: {
       type: String,
-      required: true,
+      default: '',
       trim: true,
     },
-    problemStatement: {
+    logoUrl: {
       type: String,
       default: '',
     },
-    solutionOverview: {
+    visitingCardUrl: {
       type: String,
       default: '',
     },
-    pitchDeckUrl: {
+    posterUrl: {
       type: String,
-      required: true,
+      default: '',
     },
-    liveDemoUrl: {
+    linkedinBannerUrl: {
       type: String,
-      required: true,
+      default: '',
     },
     githubUrl: {
       type: String,
-      required: true,
+      default: '',
+    },
+    deployedUrl: {
+      type: String,
+      default: '',
     },
     videoUrl: {
       type: String,
       default: '',
     },
-    techStack: {
-      type: [String],
-      default: [],
+    pitchDeckUrl: {
+      type: String,
+      default: '',
+    },
+    businessModel: {
+      type: String,
+      default: '',
+    },
+    finalPitchNotes: {
+      type: String,
+      default: '',
+    },
+    submissionStatus: {
+      type: String,
+      enum: ['NOT_STARTED', 'IN_PROGRESS', 'SUBMITTED', 'LOCKED'],
+      default: 'NOT_STARTED',
     },
     isFinal: {
       type: Boolean,
@@ -52,7 +69,7 @@ const submissionSchema = new mongoose.Schema(
     },
     submittedAt: {
       type: Date,
-      default: Date.now,
+      default: null,
     },
     score: {
       type: Number,

@@ -32,6 +32,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    registerNumber: {
+      type: String,
+      default: '',
+    },
+    mobileNumber: {
+      type: String,
+      default: '',
+    },
+    gender: {
+      type: String,
+      default: '',
+    },
+    section: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,

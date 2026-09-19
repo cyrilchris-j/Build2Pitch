@@ -12,9 +12,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
 
     return (
-      <div className="w-full space-y-1.5">
+      <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="block text-xs font-medium text-foreground-muted tracking-wide">
+          <label htmlFor={inputId} className="block mb-2 text-xs font-semibold uppercase tracking-wider text-[#FFFFFF]">
             {label}
           </label>
         )}
@@ -22,15 +22,15 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           ref={ref}
           className={cn(
-            'w-full rounded-lg bg-card/80 border border-border px-3.5 py-2 text-sm text-foreground placeholder:text-foreground-subtle',
-            'transition-colors duration-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary',
-            error && 'border-danger focus:border-danger focus:ring-danger',
+            'h-12 w-full box-border rounded-lg bg-[#111111] border border-[#242424] px-3.5 text-sm text-[#FFFFFF] placeholder:text-[#8A8A8A]',
+            'transition-colors duration-200 focus:outline-none focus:border-[#E63946] focus:ring-1 focus:ring-[#E63946]',
+            error && 'border-[#E63946] focus:border-[#E63946] focus:ring-[#E63946]',
             className
           )}
           {...props}
         />
-        {error && <p className="text-xs text-danger">{error}</p>}
-        {!error && helperText && <p className="text-xs text-foreground-subtle">{helperText}</p>}
+        {error && <p className="mt-1.5 text-xs text-[#E63946]">{error}</p>}
+        {!error && helperText && <p className="mt-1.5 text-xs text-[#8A8A8A]">{helperText}</p>}
       </div>
     );
   }

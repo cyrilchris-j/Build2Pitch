@@ -3,8 +3,9 @@ const router = express.Router();
 const submissionController = require('../controllers/submissionController');
 const { authenticate } = require('../middleware/auth');
 
+// All submission endpoints require authentication
 router.get('/me', authenticate, submissionController.getSubmission);
-router.post('/draft', authenticate, submissionController.saveDraft);
-router.post('/final', authenticate, submissionController.submitFinal);
+router.put('/me', authenticate, submissionController.saveDraft);
+router.post('/final-submit', authenticate, submissionController.submitFinal);
 
 module.exports = router;

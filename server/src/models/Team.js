@@ -9,6 +9,10 @@ const teamMemberSchema = new mongoose.Schema({
     default: 'developer',
   },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  registerNumber: { type: String, default: '' },
+  mobileNumber: { type: String, default: '' },
+  gender: { type: String, default: '' },
+  section: { type: String, default: '' },
   joinedAt: { type: Date, default: Date.now },
 });
 
