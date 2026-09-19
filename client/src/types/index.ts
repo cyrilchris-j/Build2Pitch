@@ -6,18 +6,52 @@
 // 1. User & Authentication Types
 // ==========================================
 
-export type UserRole = 'admin' | 'team_lead' | 'member';
+export type UserRole = 
+  | 'ADMIN' 
+  | 'TEAM_LEAD' 
+  | 'TEAM_MEMBER' 
+  | 'admin' 
+  | 'team_lead' 
+  | 'member';
 
 export interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
-  teamId?: string;
-  avatarUrl?: string;
-  createdAt: string;
-  updatedAt: string;
+  registerNumber?: string | null;
+  mobile?: string | null;
+  gender?: string | null;
+  section?: string | null;
+  teamId?: string | null;
+  avatarUrl?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
+
+export interface RegisterPayload {
+  name: string;
+  registerNumber: string;
+  email: string;
+  mobile: string;
+  gender: string;
+  section: string;
+  password: string;
+  confirmPassword: string;
+  teamName: string;
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponseData {
+  token: string;
+  user: User;
+  team?: Team | null;
+}
+
 
 // ==========================================
 // 2. Team Member Types

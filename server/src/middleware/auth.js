@@ -3,77 +3,80 @@ const env = require('../config/env');
 const { errorResponse } = require('../utils/response');
 
 /**
- * Authentication & Authorization Middleware
- * Verifies Bearer JWT token and enforces Role-Based Access Control (RBAC).
+ * Normalizes role string to standard uppercase format.
+ * Maps 'team_lead' -> 'TEAM_LEAD', 'member' -> 'TEAM_MEMBER', 'admin' -> 'ADMIN'
  */
+const normalizeRole = (role) => {
+  if (!role) return '';
+  const upper = String(role).trim().toUpperCase();
+  if (upper === 'MEMBER') return 'TEAM_MEMBER';
+  return upper;
+};
 
-const authenticate = (req, res, next) => {
+/**
+ * Authentication Middleware
+ * Validates the ****** in the Authorization header.
+ * Attaches decoded payload to req.user.
+ */
+const requireAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return errorResponse(res, 'Authentication required', 401);
+    return errorResponse(res, 'Authentication required: No token provided', 401);
   }
 
   const token = authHeader.split(' ')[1];
-
-  // Handle mock tokens for dev / local fallback testing
-  if (token === 'placeholder_jwt_token' || token === 'mock_leader_token') {
-    req.user = {
-      id: 'mock_user_1',
-      name: 'Test Team Leader',
-      email: 'leader@build2pitch.dev',
-      role: 'team_lead',
-      teamId: 'mock_team_1',
-    };
-    return next();
-  }
-
-  if (token === 'placeholder_member_token' || token === 'mock_member_token') {
-    req.user = {
-      id: 'mock_member_1',
-      name: 'Team Member',
-      email: 'member@build2pitch.dev',
-      role: 'member',
-      teamId: 'mock_team_1',
-    };
-    return next();
-  }
-
-  if (token === 'mock_admin_token' || token === 'placeholder_admin_token') {
-    req.user = {
-      id: 'mock_admin_1',
-      name: 'System Admin',
-      email: 'admin@build2pitch.dev',
-      role: 'admin',
-    };
-    return next();
+  if (!token) {
+    return errorResponse(res, 'Authentication required: Malformed token header', 401);
   }
 
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET);
-    req.user = decoded;
+    req.user = {
+      ...decoded,
+      role: normalizeRole(decoded.role),
+    };
     next();
   } catch (err) {
-    return errorResponse(res, 'Invalid or expired token', 401);
+    if (err.name === 'TokenExpiredError') {
+      return errorResponse(res, 'Authentication failed: Token has expired', 401);
+    }
+    return errorResponse(res, 'Authentication failed: Invalid or corrupt token', 401);
   }
 };
 
-const authorize = (allowedRoles = []) => {
+/**
+ * Authorization Middleware
+ * Enforces Role-Based Access Control (RBAC).
+ * Can be invoked with a single role or multiple roles:
+ * e.g., requireRole('ADMIN') or requireRole('TEAM_LEAD', 'ADMIN') or requireRole(['TEAM_LEAD', 'TEAM_MEMBER'])
+ */
+const requireRole = (...allowedRoles) => {
+  // Flatten array arguments in case array was passed as single arg
+  const flatRoles = allowedRoles.flat().map(normalizeRole);
+
   return (req, res, next) => {
-    if (!req.user) {
-      return errorResponse(res, 'Authentication required', 401);
+    if (!req.user || !req.user.role) {
+      return errorResponse(res, 'Authentication required before checking role permissions', 401);
     }
 
-    const normalizedUserRole = (req.user.role || '').toLowerCase();
-    const normalizedAllowed = allowedRoles.map((r) => r.toLowerCase());
+    const userRole = normalizeRole(req.user.role);
 
-    if (!normalizedAllowed.includes(normalizedUserRole)) {
-      return errorResponse(res, 'Access forbidden: Insufficient permissions', 403);
+    if (!flatRoles.includes(userRole)) {
+      return errorResponse(
+        res,
+        `Access forbidden: Role '${req.user.role}' is not authorized to access this resource`,
+        403
+      );
     }
+
     next();
   };
 };
 
 module.exports = {
-  authenticate,
-  authorize,
+  requireAuth,
+  authenticate: requireAuth, // Reusable alias
+  requireRole,
+  authorize: requireRole,   // Reusable alias
+  normalizeRole,
 };

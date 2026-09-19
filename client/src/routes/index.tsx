@@ -50,17 +50,17 @@ export const AppRoutes: React.FC = () => {
       <Route
         path="/member/dashboard"
         element={
-          <ProtectedRoute allowedRoles={['member', 'team_lead']}>
+          <ProtectedRoute allowedRoles={['TEAM_MEMBER', 'member', 'TEAM_LEAD', 'team_lead']}>
             <MemberDashboardPage />
           </ProtectedRoute>
         }
       />
 
-      {/* Team Portal Routes (with Team Layout & Sidebar) */}
+      {/* Team Portal Routes (Strictly for Team Leads) */}
       <Route
         path="/team"
         element={
-          <ProtectedRoute allowedRoles={['team_lead', 'member']}>
+          <ProtectedRoute allowedRoles={['TEAM_LEAD', 'team_lead']}>
             <TeamLayout />
           </ProtectedRoute>
         }
@@ -75,11 +75,11 @@ export const AppRoutes: React.FC = () => {
       {/* Admin Portal Authentication */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
 
-      {/* Admin Portal Routes (with Admin Layout & Sidebar) */}
+      {/* Admin Portal Routes (Strictly for Admins) */}
       <Route
         path="/admin"
         element={
-          <ProtectedRoute allowedRoles={['admin']}>
+          <ProtectedRoute allowedRoles={['ADMIN', 'admin']}>
             <AdminLayout />
           </ProtectedRoute>
         }
