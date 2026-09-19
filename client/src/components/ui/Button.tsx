@@ -16,20 +16,20 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]';
+  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-lg transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-[#E63946] disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants = {
-    primary: 'bg-primary hover:bg-primary-hover text-background font-semibold shadow-glow-primary focus:ring-primary',
-    accent: 'bg-accent hover:bg-accent-hover text-background font-semibold shadow-glow-accent focus:ring-accent',
-    outline: 'border border-border hover:border-primary/50 text-foreground hover:bg-card focus:ring-primary',
-    ghost: 'text-foreground-muted hover:text-foreground hover:bg-card/60 focus:ring-primary',
-    danger: 'bg-danger hover:bg-danger-hover text-white focus:ring-danger',
+    primary: 'bg-[#E63946] hover:bg-[#D62839] text-[#FFFFFF] border border-[#E63946]',
+    accent: 'bg-[#E63946] hover:bg-[#D62839] text-[#FFFFFF] border border-[#E63946]',
+    outline: 'bg-[#111111] border border-[#242424] text-[#FFFFFF] hover:bg-[#1A1A1A] hover:border-[#333333]',
+    ghost: 'text-[#8A8A8A] hover:text-[#FFFFFF] hover:bg-[#111111]',
+    danger: 'bg-[#E63946] hover:bg-[#D62839] text-[#FFFFFF]',
   };
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
+    sm: 'h-9 px-3.5 text-xs',
+    md: 'h-11 px-5 text-sm',
+    lg: 'h-12 px-6 text-base',
   };
 
   return (

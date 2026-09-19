@@ -22,6 +22,9 @@ apiClient.interceptors.request.use(
     const token = localStorage.getItem('build2pitch_token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else if (config.headers && !config.headers.Authorization) {
+      // Default dev fallback token when no token exists in localStorage
+      config.headers.Authorization = 'Bearer mock_leader_token';
     }
     return config;
   },
@@ -100,10 +103,10 @@ export const submissionService = {
     return apiClient.get('/submissions/me');
   },
   saveDraft: async (data: Record<string, unknown>) => {
-    return apiClient.post('/submissions/draft', data);
+    return apiClient.put('/submissions/me', data);
   },
   submitFinal: async (data: Record<string, unknown>) => {
-    return apiClient.post('/submissions/final', data);
+    return apiClient.post('/submissions/final-submit', data);
   },
 };
 
@@ -111,20 +114,26 @@ export const adminService = {
   getStats: async () => {
     return apiClient.get('/admin/stats');
   },
-  getTeams: async () => {
-    return apiClient.get('/admin/teams');
+  getTeams: async (params?: Record<string, unknown>) => {
+    return apiClient.get('/admin/teams', { params });
   },
-  getStudents: async () => {
-    return apiClient.get('/admin/students');
+  getStudents: async (params?: Record<string, unknown>) => {
+    return apiClient.get('/admin/students', { params });
   },
   getIdeas: async () => {
     return apiClient.get('/admin/ideas');
   },
-  getSubmissions: async () => {
-    return apiClient.get('/admin/submissions');
+  createIdea: async (idea: Record<string, unknown>) => {
+    return apiClient.post('/admin/ideas', idea);
   },
-  updateEventSettings: async (settings: Record<string, unknown>) => {
-    return apiClient.patch('/admin/settings', settings);
+  updateIdea: async (id: string, idea: Record<string, unknown>) => {
+    return apiClient.put(`/admin/ideas/${id}`, idea);
+  },
+  deleteIdea: async (id: string) => {
+    return apiClient.delete(`/admin/ideas/${id}`);
+  },
+  getSubmissions: async (params?: Record<string, unknown>) => {
+    return apiClient.get('/admin/submissions', { params });
   },
 };
 

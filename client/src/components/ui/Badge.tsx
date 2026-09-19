@@ -12,11 +12,11 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const variants = {
-    primary: 'bg-primary/15 text-primary border-primary/30',
-    accent: 'bg-accent/15 text-accent border-accent/30',
-    success: 'bg-success/15 text-success border-success/30',
-    danger: 'bg-danger/15 text-danger border-danger/30',
-    muted: 'bg-card text-foreground-muted border-border',
+    primary: 'bg-[#111111] text-[#E63946] border-[#242424]',
+    accent: 'bg-[#111111] text-[#E63946] border-[#242424]',
+    success: 'bg-[#111111] text-[#FFFFFF] border-[#242424]',
+    danger: 'bg-[#111111] text-[#E63946] border-[#242424]',
+    muted: 'bg-[#111111] text-[#8A8A8A] border-[#242424]',
   };
 
   return (

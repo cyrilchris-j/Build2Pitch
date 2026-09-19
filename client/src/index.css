@@ -5,30 +5,30 @@
 :root {
   --color-background: #070707;
   --color-background-subtle: #0D0D0D;
-  --color-background-elevated: #141414;
+  --color-background-elevated: #111111;
   
   --color-foreground: #FFFFFF;
   --color-foreground-muted: #8A8A8A;
-  --color-foreground-subtle: #666666;
+  --color-foreground-subtle: #5A5A5A;
   
   --color-card: #111111;
   --color-card-hover: #181818;
   
   --color-border: #242424;
-  --color-border-hover: #383838;
+  --color-border-hover: #333333;
   
   --color-primary: #E63946;
-  --color-primary-hover: #D32F2F;
-  --color-primary-light: #FF6B6B;
+  --color-primary-hover: #D62839;
+  --color-primary-light: #FF4D5D;
   
   --color-accent: #E63946;
-  --color-accent-hover: #D32F2F;
+  --color-accent-hover: #D62839;
   
-  --color-danger: #EF4444;
-  --color-danger-hover: #DC2626;
+  --color-danger: #E63946;
+  --color-danger-hover: #D62839;
   
-  --color-success: #10B981;
-  --color-success-hover: #059669;
+  --color-success: #E63946;
+  --color-success-hover: #D62839;
 }
 
 /* Custom Scrollbars */
@@ -47,36 +47,21 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #383838;
+  background: #333333;
 }
 
-/* Glassmorphic utilities */
+/* Dark theme utilities */
 .glass-panel {
-  background: rgba(17, 17, 17, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #111111;
+  border: 1px solid #242424;
 }
 
 .glass-card {
-  background: rgba(17, 17, 17, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(36, 36, 36, 0.9);
+  background: #111111;
+  border: 1px solid #242424;
 }
 
-.glow-border-accent {
+.glow-border-red {
   border-color: rgba(230, 57, 70, 0.4);
   box-shadow: 0 0 15px -3px rgba(230, 57, 70, 0.25);
 }
-
-.glow-border-cyan {
-  border-color: rgba(230, 57, 70, 0.4);
-  box-shadow: 0 0 15px -3px rgba(230, 57, 70, 0.25);
-}
-
-.glow-border-amber {
-  border-color: rgba(245, 158, 11, 0.4);
-  box-shadow: 0 0 15px -3px rgba(245, 158, 11, 0.25);
-}
-

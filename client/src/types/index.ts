@@ -82,7 +82,8 @@ export interface TeamMember {
 export type IdeaComplexity = 'beginner' | 'intermediate' | 'advanced';
 
 export interface StartupIdea {
-  id: string;
+  id?: string;
+  _id?: string;
   title: string;
   industry: string;
   problemStatement: string;
@@ -115,24 +116,25 @@ export interface IdeaAssignment {
 // ==========================================
 
 export interface Submission {
-  id: string;
+  id?: string;
+  _id?: string;
   teamId: string;
-  startupName: string;
-  tagline: string;
-  problemStatement?: string;
-  solutionOverview?: string;
-  pitchDeckUrl: string;
-  liveDemoUrl: string;
+  startupName?: string;
+  tagline?: string;
+  logoUrl: string;
+  visitingCardUrl: string;
+  posterUrl: string;
+  linkedinBannerUrl: string;
   githubUrl: string;
-  videoUrl?: string;
-  techStack: string[];
-  submittedAt: string;
+  deployedUrl: string;
+  videoUrl: string;
+  pitchDeckUrl?: string;
+  businessModel?: string;
+  finalPitchNotes?: string;
+  submissionStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED' | 'LOCKED';
   isFinal: boolean;
-  feedback?: {
-    score?: number;
-    notes?: string;
-    evaluatedBy?: string;
-  };
+  submittedAt?: string | null;
+  score?: number | null;
 }
 
 // ==========================================

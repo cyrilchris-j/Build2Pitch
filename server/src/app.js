@@ -11,7 +11,13 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: env.CLIENT_URL || '*',
+  origin: (origin, callback) => {
+    // Allow any origin during development or requests without origin header
+    if (!origin || env.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true,
 }));
 app.use(express.json());

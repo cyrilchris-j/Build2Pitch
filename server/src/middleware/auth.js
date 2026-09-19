@@ -15,7 +15,7 @@ const normalizeRole = (role) => {
 
 /**
  * Authentication Middleware
- * Validates the Bearer token in the Authorization header.
+ * Validates the ****** in the Authorization header.
  * Attaches decoded payload to req.user.
  */
 const requireAuth = (req, res, next) => {
@@ -80,4 +80,3 @@ module.exports = {
   authorize: requireRole,   // Reusable alias
   normalizeRole,
 };
-
