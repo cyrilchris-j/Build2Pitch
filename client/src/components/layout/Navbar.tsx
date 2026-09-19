@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Rocket, Shield, Users, LogIn, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Rocket, Shield, Users, LogIn, LogOut, Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/context/AuthContext';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -19,13 +22,27 @@ export const Navbar: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const formatRoleBadge = (role?: string) => {
+    if (!role) return '';
+    const upper = role.toUpperCase();
+    if (upper === 'TEAM_LEAD' || upper === 'LEADER') return 'Team Lead';
+    if (upper === 'TEAM_MEMBER' || upper === 'MEMBER') return 'Member';
+    if (upper === 'ADMIN') return 'Admin';
+    return role;
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-background font-black shadow-glow-primary transition-transform group-hover:scale-105">
-            <Rocket className="h-5 w-5 fill-background" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[#991b1b] text-white font-black shadow-glow-primary transition-transform group-hover:scale-105">
+            <Rocket className="h-5 w-5 fill-white" />
           </div>
           <div className="flex flex-col">
             <span className="font-display text-lg font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors">
@@ -70,17 +87,46 @@ export const Navbar: React.FC = () => {
 
         {/* Action Controls */}
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/login">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <LogIn className="h-4 w-4" />
-              Sign In
-            </Button>
-          </Link>
-          <Link to="/register">
-            <Button variant="primary" size="sm">
-              Register Team
-            </Button>
-          </Link>
+          {isAuthenticated && user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border">
+                <div className="h-7 w-7 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary text-xs font-bold">
+                  {user.name ? user.name.charAt(0).toUpperCase() : <User className="h-3.5 w-3.5" />}
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-xs font-bold text-foreground leading-none">
+                    {user.name}
+                  </span>
+                  <span className="text-[10px] font-semibold text-primary mt-0.5 uppercase tracking-wider">
+                    {formatRoleBadge(user.role)}
+                  </span>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="gap-1.5 hover:border-danger/50 hover:text-danger"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button variant="primary" size="sm">
+                  Register Team
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger */}
@@ -98,6 +144,18 @@ export const Navbar: React.FC = () => {
       {/* Mobile Drawer */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-b border-border bg-card/95 px-4 pt-2 pb-6 space-y-2 backdrop-blur-xl">
+          {isAuthenticated && user && (
+            <div className="p-3 mb-2 rounded-lg bg-background border border-border flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary text-xs font-bold">
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">{user.name}</p>
+                <p className="text-xs text-primary font-semibold">{formatRoleBadge(user.role)}</p>
+              </div>
+            </div>
+          )}
+
           {navLinks.map((link) => (
             <Link
               key={link.path}
@@ -108,16 +166,33 @@ export const Navbar: React.FC = () => {
               {link.label}
             </Link>
           ))}
+
           <div className="pt-4 border-t border-border flex flex-col gap-2">
-            <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="outline" className="w-full">Sign In</Button>
-            </Link>
-            <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="primary" className="w-full">Register Team</Button>
-            </Link>
+            {isAuthenticated ? (
+              <Button
+                variant="outline"
+                className="w-full text-danger border-danger/40"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleLogout();
+                }}
+              >
+                Sign Out
+              </Button>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">Sign In</Button>
+                </Link>
+                <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="primary" className="w-full">Register Team</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
     </header>
   );
 };
+

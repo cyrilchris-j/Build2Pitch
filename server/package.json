@@ -5,7 +5,9 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
-    "dev": "node --watch src/app.js"
+    "dev": "node --watch src/app.js",
+    "seed:admin": "node src/utils/seedAdmin.js",
+    "test:auth": "node src/utils/testAuth.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
