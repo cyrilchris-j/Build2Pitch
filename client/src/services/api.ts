@@ -1,5 +1,7 @@
 import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
-import type { ApiResponse } from '@/types';
+import type { ApiResponse, AuthResponseData, RegisterPayload, User, Team } from '@/types';
+
+
 
 /**
  * Base API client configuration
@@ -61,17 +63,20 @@ apiClient.interceptors.response.use(
  */
 
 export const authService = {
-  login: async (credentials: Record<string, unknown>) => {
-    return apiClient.post('/auth/login', credentials);
+  login: async (credentials: { email: string; password: string }) => {
+    return apiClient.post<ApiResponse<AuthResponseData>>('/auth/login', credentials);
   },
-  register: async (payload: Record<string, unknown>) => {
-    return apiClient.post('/auth/register', payload);
+  register: async (payload: RegisterPayload) => {
+    return apiClient.post<ApiResponse<AuthResponseData>>('/auth/register', payload);
   },
-  memberLogin: async (code: string) => {
-    return apiClient.post('/auth/member-login', { code });
+  memberLogin: async (credentials: { email: string; password: string }) => {
+    return apiClient.post<ApiResponse<AuthResponseData>>('/auth/member-login', credentials);
+  },
+  adminLogin: async (credentials: { email: string; password: string }) => {
+    return apiClient.post<ApiResponse<AuthResponseData>>('/auth/admin-login', credentials);
   },
   getProfile: async () => {
-    return apiClient.get('/auth/me');
+    return apiClient.get<ApiResponse<{ user: User; team?: Team | null }>>('/auth/me');
   },
 };
 
