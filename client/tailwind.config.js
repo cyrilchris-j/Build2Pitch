@@ -9,32 +9,32 @@ export default {
     extend: {
       colors: {
         background: {
-          DEFAULT: '#090D16',
-          subtle: '#0D1424',
-          elevated: '#111A2E',
+          DEFAULT: '#070707',
+          subtle: '#0D0D0D',
+          elevated: '#141414',
         },
         foreground: {
-          DEFAULT: '#F8FAFC',
-          muted: '#94A3B8',
-          subtle: '#64748B',
+          DEFAULT: '#FFFFFF',
+          muted: '#8A8A8A',
+          subtle: '#666666',
         },
         card: {
-          DEFAULT: '#0F172A',
-          hover: '#131D35',
+          DEFAULT: '#111111',
+          hover: '#181818',
         },
         border: {
-          DEFAULT: '#1E293B',
-          hover: '#334155',
+          DEFAULT: '#242424',
+          hover: '#383838',
         },
         primary: {
-          DEFAULT: '#06B6D4',
-          hover: '#0891B2',
-          light: '#22D3EE',
+          DEFAULT: '#E63946',
+          hover: '#D32F2F',
+          light: '#FF6B6B',
         },
         accent: {
-          DEFAULT: '#F59E0B',
-          hover: '#D97706',
-          light: '#FBBF24',
+          DEFAULT: '#E63946',
+          hover: '#D32F2F',
+          light: '#FF6B6B',
         },
         danger: {
           DEFAULT: '#EF4444',
@@ -50,13 +50,13 @@ export default {
         display: ['Outfit', 'Inter', 'sans-serif'],
       },
       boxShadow: {
-        'glow-primary': '0 0 25px -5px rgba(6, 182, 212, 0.35)',
-        'glow-accent': '0 0 25px -5px rgba(245, 158, 11, 0.35)',
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'glow-primary': '0 0 25px -5px rgba(230, 57, 70, 0.45)',
+        'glow-accent': '0 0 25px -5px rgba(230, 57, 70, 0.45)',
+        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.65)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'cinematic-glow': 'radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.15), transparent 70%)',
+        'cinematic-glow': 'radial-gradient(circle at 50% 0%, rgba(230, 57, 70, 0.18), transparent 70%)',
       },
     },
   },
