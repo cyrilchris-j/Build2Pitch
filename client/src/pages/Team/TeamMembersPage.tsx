@@ -145,10 +145,10 @@ export const TeamMembersPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const isTeamLead = user?.role?.toUpperCase() === 'TEAM_LEAD';
-  // Total 6 members = 1 lead + 5 members. Lead is not in this list from the API.
-  const MAX_ADDITIONAL_MEMBERS = 5;
+  // Standard 6-member team: 1 Team Lead + 5 Team Members = 6 total members
+  const MAX_TEAM_SIZE = 6;
   const memberCount = members.length;
-  const canAddMore = memberCount < MAX_ADDITIONAL_MEMBERS && isTeamLead;
+  const canAddMore = memberCount < MAX_TEAM_SIZE && isTeamLead;
 
   useEffect(() => {
     fetchMembers();
@@ -250,14 +250,14 @@ export const TeamMembersPage: React.FC = () => {
           <div>
             <h1 className="text-xl font-black text-foreground tracking-tight">Team Members</h1>
             <p className="text-xs text-foreground-muted">
-              {memberCount}/{MAX_ADDITIONAL_MEMBERS} members added (6 total including you)
+              {memberCount}/{MAX_TEAM_SIZE} members registered ({MAX_TEAM_SIZE - memberCount > 0 ? `${MAX_TEAM_SIZE - memberCount} slot${MAX_TEAM_SIZE - memberCount > 1 ? 's' : ''} remaining` : 'Full roster'})
             </p>
           </div>
         </div>
         <ProgressBar
           value={memberCount}
-          max={MAX_ADDITIONAL_MEMBERS}
-          color={memberCount >= MAX_ADDITIONAL_MEMBERS ? 'success' : 'primary'}
+          max={MAX_TEAM_SIZE}
+          color={memberCount >= MAX_TEAM_SIZE ? 'success' : 'primary'}
           className="mt-3"
         />
       </div>
@@ -328,7 +328,7 @@ export const TeamMembersPage: React.FC = () => {
           </AnimatePresence>
 
           {/* Empty slots */}
-          {Array.from({ length: MAX_ADDITIONAL_MEMBERS - memberCount }).map((_, i) => (
+          {Array.from({ length: Math.max(0, MAX_TEAM_SIZE - memberCount) }).map((_, i) => (
             <motion.div
               key={`empty-${i}`}
               initial={{ opacity: 0 }}
@@ -351,11 +351,11 @@ export const TeamMembersPage: React.FC = () => {
           leftIcon={<UserPlus className="h-4 w-4" />}
           className="w-full"
         >
-          Add Team Member ({memberCount}/{MAX_ADDITIONAL_MEMBERS})
+          Add Team Member ({memberCount}/{MAX_TEAM_SIZE})
         </Button>
       )}
 
-      {memberCount >= MAX_ADDITIONAL_MEMBERS && (
+      {memberCount >= MAX_TEAM_SIZE && (
         <div className="flex items-center justify-center gap-2 py-4 px-5 rounded-xl border border-success/30 bg-success/5 text-success text-sm font-semibold">
           <CheckCircle2 className="h-5 w-5" />
           Team is full! All 6 members registered.
