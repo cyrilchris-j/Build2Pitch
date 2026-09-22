@@ -13,11 +13,15 @@ import type {
 } from '@/types';
 
 function getValidApiBaseUrl(): string {
-  const envUrl = (import.meta.env.VITE_API_URL || '').trim();
+  let envUrl = (import.meta.env.VITE_API_URL || '').trim();
   if (envUrl && !envUrl.includes('<') && !envUrl.includes('>')) {
     try {
       if (envUrl.startsWith('/') || envUrl.startsWith('http://') || envUrl.startsWith('https://')) {
-        return envUrl.replace(/\/+$/, '');
+        envUrl = envUrl.replace(/\/+$/, '');
+        if (!envUrl.endsWith('/api')) {
+          envUrl = `${envUrl}/api`;
+        }
+        return envUrl;
       }
     } catch {
       // fallback
