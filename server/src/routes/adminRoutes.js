@@ -5,10 +5,11 @@ const { authenticate, authorize } = require('../middleware/auth');
 
 // Enforce authentication + admin role authorization on all admin routes
 router.use(authenticate);
-router.use(authorize(['admin']));
+router.use(authorize(['ADMIN', 'admin']));
 
 router.get('/stats', adminController.getStats);
 router.get('/teams', adminController.getTeams);
+router.get('/teams/:id', adminController.getTeamById);
 router.get('/students', adminController.getStudents);
 router.get('/ideas', adminController.getIdeas);
 router.post('/ideas', adminController.createIdea);

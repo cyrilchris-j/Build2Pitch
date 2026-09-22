@@ -2,6 +2,7 @@ import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig 
 import type {
   ApiResponse,
   AuthResponseData,
+  EventSettings,
   IdeaRollResult,
   IdeaVault,
   LockedIdeaResult,
@@ -14,7 +15,7 @@ import type {
 /**
  * Base API client configuration
  */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -52,9 +53,6 @@ apiClient.interceptors.request.use(
     const token = localStorage.getItem('build2pitch_token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
-    } else if (config.headers && !config.headers.Authorization) {
-      // Default dev fallback token when no token exists in localStorage
-      config.headers.Authorization = 'Bearer mock_leader_token';
     }
     if (config.headers) {
       config.headers['x-team-id'] = getTeamId();
@@ -72,11 +70,15 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError<ApiResponse<unknown>>) => {
-    // Centralized API error handling
-    const errorMessage = 
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      error.message || 
+    if (error.response?.status === 401) {
+      // Token expired — clean up and redirect to login
+      localStorage.removeItem('build2pitch_token');
+    }
+
+    const errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
       'An unexpected network error occurred';
 
     console.error('[API Error]:', {
@@ -93,11 +95,7 @@ apiClient.interceptors.response.use(
   }
 );
 
-/**
- * API Service Placeholders
- * To be implemented as business features are developed.
- */
-
+// ─── Auth Service ─────────────────────────────────────────────────────────────
 export const authService = {
   login: async (credentials: { email: string; password: string }) => {
     return apiClient.post<ApiResponse<AuthResponseData>>('/auth/login', credentials);
@@ -116,6 +114,7 @@ export const authService = {
   },
 };
 
+// ─── Team Service ─────────────────────────────────────────────────────────────
 export const teamService = {
   getTeamDashboard: async () => {
     return apiClient.get('/teams/me');
@@ -123,14 +122,26 @@ export const teamService = {
   getMembers: async () => {
     return apiClient.get('/teams/me/members');
   },
-  addMember: async (member: Record<string, unknown>) => {
+  addMember: async (member: {
+    name: string;
+    registerNumber: string;
+    email: string;
+    mobile: string;
+    gender: string;
+    section: string;
+    password: string;
+  }) => {
     return apiClient.post('/teams/me/members', member);
+  },
+  removeMember: async (memberId: string) => {
+    return apiClient.delete(`/teams/me/members/${memberId}`);
   },
   getAssignedIdea: async () => {
     return apiClient.get('/teams/me/idea');
   },
 };
 
+// ─── Idea Roll Service ────────────────────────────────────────────────────────
 export const ideaRollService = {
   getVault: async (): Promise<IdeaVault> => {
     const res = await apiClient.get<ApiResponse<IdeaVault>>('/ideas/available');
@@ -150,6 +161,7 @@ export const ideaRollService = {
   },
 };
 
+// ─── Submission Service ───────────────────────────────────────────────────────
 export const submissionService = {
   getSubmission: async () => {
     return apiClient.get('/submissions/me');
@@ -162,12 +174,27 @@ export const submissionService = {
   },
 };
 
+// ─── Event Service ────────────────────────────────────────────────────────────
+export const eventService = {
+  getSettings: async (): Promise<EventSettings> => {
+    const res = await apiClient.get<ApiResponse<EventSettings>>('/event/settings');
+    return res.data.data as EventSettings;
+  },
+  updateSettings: async (data: Partial<EventSettings>) => {
+    return apiClient.put('/event/settings', data);
+  },
+};
+
+// ─── Admin Service ────────────────────────────────────────────────────────────
 export const adminService = {
   getStats: async () => {
     return apiClient.get('/admin/stats');
   },
   getTeams: async (params?: Record<string, unknown>) => {
     return apiClient.get('/admin/teams', { params });
+  },
+  getTeamById: async (id: string) => {
+    return apiClient.get(`/admin/teams/${id}`);
   },
   getStudents: async (params?: Record<string, unknown>) => {
     return apiClient.get('/admin/students', { params });

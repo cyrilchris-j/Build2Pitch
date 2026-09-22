@@ -4,9 +4,9 @@ import type { StartupIdea } from '@/types';
 export default function LockedScreen({ idea }: { idea: StartupIdea | null }) {
   if (!idea) return null;
   const rows: Array<[string, string]> = [
-    ['Problem', idea.problemStatement],
-    ['Target Users', idea.targetAudience],
-    ['Category', idea.category || idea.industry],
+    ['Problem', idea.problemStatement || ''],
+    ['Target Users', idea.targetAudience || ''],
+    ['Category', idea.category || idea.industry || ''],
   ];
   return (
     <motion.section

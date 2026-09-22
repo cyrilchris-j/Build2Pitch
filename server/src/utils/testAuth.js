@@ -31,11 +31,20 @@ async function runAuthTests() {
     }
   }
 
+  let mongod = null;
   try {
     // 1. Connect DB or start in-memory
     console.log('1. Connecting to database...');
-    await mongoose.connect(env.MONGODB_URI);
-    console.log('   Connected to database.\n');
+    try {
+      await mongoose.connect(env.MONGODB_URI, { serverSelectionTimeoutMS: 1500 });
+      console.log('   Connected to local database.\n');
+    } catch (dbErr) {
+      console.log('   Local MongoDB not reachable, launching MongoMemoryServer...');
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      mongod = await MongoMemoryServer.create();
+      await mongoose.connect(mongod.getUri());
+      console.log('   Connected to MongoMemoryServer instance.\n');
+    }
 
     // Clean test data
     await User.deleteMany({ email: /test.*@build2pitch.dev/ });
@@ -245,12 +254,14 @@ async function runAuthTests() {
 
     server.close();
     await mongoose.disconnect();
+    if (mongod) await mongod.stop();
     process.exit(0);
   } catch (err) {
     console.error('\n❌ Test execution failed with error:', err);
     if (server) server.close();
     try {
       await mongoose.disconnect();
+      if (mongod) await mongod.stop();
     } catch {}
     process.exit(1);
   }

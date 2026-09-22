@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ['male', 'female', 'other', 'Male', 'Female', 'Other', null],
+      enum: ['MALE', 'FEMALE', 'OTHER', 'male', 'female', 'other', 'Male', 'Female', 'Other', null, ''],
       default: null,
     },
     section: {
@@ -49,31 +49,16 @@ const userSchema = new mongoose.Schema(
       ref: 'Team',
       default: null,
     },
-    avatarUrl: {
-      type: String,
-      default: null,
-    },
-    registerNumber: {
-      type: String,
-      default: '',
-    },
-    mobileNumber: {
-      type: String,
-      default: '',
-    },
-    gender: {
-      type: String,
-      default: '',
-    },
-    section: {
-      type: String,
-      default: '',
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {
     timestamps: true,
     toJSON: {
       transform: function (doc, ret) {
+        ret.id = ret._id;
         delete ret.passwordHash;
         delete ret.__v;
         return ret;
@@ -88,4 +73,3 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 module.exports = mongoose.model('User', userSchema);
-

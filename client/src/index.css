@@ -1,67 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   CSS CUSTOM PROPERTIES — NEXTGEN Design Tokens
+   ============================================ */
 :root {
-  --color-background: #070707;
-  --color-background-subtle: #0D0D0D;
-  --color-background-elevated: #111111;
-  
+  /* Backgrounds */
+  --color-background: #070711;
+  --color-background-subtle: #0D0D1A;
+  --color-background-elevated: #0F0F1E;
+
+  /* Text */
   --color-foreground: #FFFFFF;
-  --color-foreground-muted: #8A8A8A;
-  --color-foreground-subtle: #5A5A5A;
-  
-  --color-card: #111111;
-  --color-card-hover: #181818;
-  
-  --color-border: #242424;
-  --color-border-hover: #333333;
-  
-  --color-primary: #E63946;
-  --color-primary-hover: #D62839;
-  --color-primary-light: #FF4D5D;
-  
-  --color-accent: #E63946;
-  --color-accent-hover: #D62839;
-  
-  --color-danger: #E63946;
-  --color-danger-hover: #D62839;
-  
-  --color-success: #E63946;
-  --color-success-hover: #D62839;
+  --color-foreground-muted: #8A8FA8;
+  --color-foreground-subtle: #4A4F65;
+
+  /* Cards / Surfaces */
+  --color-card: #0F0F1E;
+  --color-card-hover: #14142B;
+
+  /* Borders */
+  --color-border: #1E1E3A;
+  --color-border-hover: #2A2A50;
+
+  /* Primary: Electric Blue */
+  --color-primary: #00D4FF;
+  --color-primary-hover: #00BFEA;
+  --color-primary-light: #33DDFF;
+
+  /* Accent: Cyan */
+  --color-accent: #06B6D4;
+
+  /* Purple */
+  --color-purple: #7C3AED;
+  --color-purple-light: #A855F7;
+
+  /* Status */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+
+  /* Glows */
+  --glow-primary: rgba(0, 212, 255, 0.35);
+  --glow-accent: rgba(6, 182, 212, 0.3);
+  --glow-purple: rgba(124, 58, 237, 0.35);
 }
 
-/* Custom Scrollbars */
+/* ============================================
+   BASE STYLES
+   ============================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selection highlight */
+::selection {
+  background-color: rgba(0, 212, 255, 0.25);
+  color: #00D4FF;
+}
+
+/* ============================================
+   CUSTOM SCROLLBARS
+   ============================================ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #070707;
+  background: #070711;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #242424;
+  background: #1E1E3A;
   border-radius: 9999px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #333333;
+  background: #00D4FF33;
 }
 
-/* Dark theme utilities */
-.glass-panel {
-  background: #111111;
-  border: 1px solid #242424;
+/* ============================================
+   GLASSMORPHISM
+   ============================================ */
+.glass {
+  background: rgba(15, 15, 30, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(30, 30, 58, 0.8);
 }
 
-.glass-card {
-  background: #111111;
-  border: 1px solid #242424;
+.glass-bright {
+  background: rgba(20, 20, 43, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 212, 255, 0.15);
 }
 
-.glow-border-red {
-  border-color: rgba(230, 57, 70, 0.4);
-  box-shadow: 0 0 15px -3px rgba(230, 57, 70, 0.25);
+/* ============================================
+   GLOW EFFECTS
+   ============================================ */
+.glow-blue {
+  box-shadow: 0 0 25px -5px rgba(0, 212, 255, 0.4);
+}
+.glow-cyan {
+  box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.3);
+}
+.glow-purple {
+  box-shadow: 0 0 30px -5px rgba(124, 58, 237, 0.4);
+}
+.glow-text-blue {
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+}
+
+/* ============================================
+   GRADIENT BACKGROUNDS
+   ============================================ */
+.bg-hero-gradient {
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    rgba(0, 212, 255, 0.08) 0%,
+    rgba(124, 58, 237, 0.06) 40%,
+    transparent 100%
+  );
+}
+
+.bg-card-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    transparent 50%
+  );
+}
+
+/* ============================================
+   GRADIENT TEXT
+   ============================================ */
+.gradient-text {
+  background: linear-gradient(135deg, #00D4FF, #06B6D4, #A855F7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-blue {
+  background: linear-gradient(135deg, #00D4FF, #33DDFF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   BORDER ANIMATIONS
+   ============================================ */
+.border-glow-blue {
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 15px -3px rgba(0, 212, 255, 0.25);
+}
+
+.border-glow-purple {
+  border-color: rgba(124, 58, 237, 0.4);
+  box-shadow: 0 0 15px -3px rgba(124, 58, 237, 0.25);
+}
+
+/* ============================================
+   CARD STYLES
+   ============================================ */
+.premium-card {
+  background: linear-gradient(135deg, rgba(15, 15, 30, 0.9), rgba(20, 20, 43, 0.8));
+  border: 1px solid rgba(30, 30, 58, 0.8);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.premium-card:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+  box-shadow: 0 8px 40px 0 rgba(0, 212, 255, 0.1);
+}
+
+/* ============================================
+   GRID NOISE TEXTURE
+   ============================================ */
+.grid-texture {
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ============================================
+   LOADING SKELETON
+   ============================================ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(30, 30, 58, 0.8) 25%,
+    rgba(42, 42, 80, 0.6) 50%,
+    rgba(30, 30, 58, 0.8) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ============================================
+   COUNTDOWN DIGITS
+   ============================================ */
+.countdown-digit {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================
+   ADMIN TABLE
+   ============================================ */
+.admin-table thead th {
+  background: rgba(15, 15, 30, 0.9);
+  color: #8A8FA8;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #1E1E3A;
+}
+
+.admin-table tbody tr {
+  border-bottom: 1px solid rgba(30, 30, 58, 0.5);
+  transition: background-color 0.15s;
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(0, 212, 255, 0.04);
 }
