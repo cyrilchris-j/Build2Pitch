@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { EventCountdown } from '@/components/countdown/EventCountdown';
 import { useEventSettings } from '@/hooks/useEventSettings';
+import { ParticleText } from '@/components/ui/ParticleText';
 
 // ─── Animated Section Header ──────────────────────────────────────────────────
 const SectionLabel: React.FC<{ text: string }> = ({ text }) => (
@@ -243,15 +244,18 @@ export const LandingPage: React.FC = () => {
           </motion.div>
 
           {/* Main title */}
-          <motion.h1
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black leading-none tracking-tighter mb-6"
+            className="mb-6 flex justify-center"
           >
-            <span className="gradient-text">NEXT</span>
-            <span className="text-foreground">GEN</span>
-          </motion.h1>
+            <h1 className="sr-only">Build2Pitch</h1>
+            <ParticleText
+              text="Build2Pitch"
+              className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black leading-none tracking-tighter"
+            />
+          </motion.div>
 
           {/* Tagline */}
           <motion.p
