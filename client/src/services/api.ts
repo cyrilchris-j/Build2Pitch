@@ -12,10 +12,21 @@ import type {
   User,
 } from '@/types';
 
-/**
- * Base API client configuration
- */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+function getValidApiBaseUrl(): string {
+  const envUrl = (import.meta.env.VITE_API_URL || '').trim();
+  if (envUrl && !envUrl.includes('<') && !envUrl.includes('>')) {
+    try {
+      if (envUrl.startsWith('/') || envUrl.startsWith('http://') || envUrl.startsWith('https://')) {
+        return envUrl.replace(/\/+$/, '');
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return import.meta.env.DEV ? 'http://localhost:5001/api' : '/api';
+}
+
+const API_BASE_URL = getValidApiBaseUrl();
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -75,11 +86,19 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('build2pitch_token');
     }
 
-    const errorMessage =
+    let errorMessage =
       error.response?.data?.message ||
       error.response?.data?.error ||
       error.message ||
       'An unexpected network error occurred';
+
+    if (!error.response) {
+      if (errorMessage.includes('Invalid URL') || errorMessage.includes('Failed to construct')) {
+        errorMessage = 'Invalid backend API URL configuration. Please check your VITE_API_URL environment variable.';
+      } else if (error.code === 'ERR_NETWORK' || errorMessage.includes('Network Error')) {
+        errorMessage = 'Unable to connect to the server. Please ensure the backend is running and online.';
+      }
+    }
 
     console.error('[API Error]:', {
       status: error.response?.status,
