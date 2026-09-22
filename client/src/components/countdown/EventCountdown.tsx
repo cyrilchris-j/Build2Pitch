@@ -167,7 +167,7 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
             <p className="text-xs text-foreground-subtle uppercase tracking-wider font-semibold">
               The Clock Is Running
             </p>
-            <p className="text-sm font-bold text-foreground">Time Until NEXTGEN</p>
+            <p className="text-sm font-bold text-foreground">Time Until Build2Pitch</p>
           </div>
         </div>
         <span className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold">

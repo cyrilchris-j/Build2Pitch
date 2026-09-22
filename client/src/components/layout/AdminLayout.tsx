@@ -104,7 +104,7 @@ export const AdminLayout: React.FC = () => {
             <p className="text-[10px] text-foreground-subtle uppercase tracking-wider font-semibold mb-1">
               Platform
             </p>
-            <p className="text-xs font-bold text-purple-light">NEXTGEN 2026</p>
+            <p className="text-xs font-bold text-purple-light">Build2Pitch 2026</p>
             <p className="text-[10px] text-foreground-subtle">Build2Pitch Event Platform</p>
           </div>
         </div>

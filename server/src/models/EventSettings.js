@@ -4,7 +4,7 @@ const eventSettingsSchema = new mongoose.Schema(
   {
     eventName: {
       type: String,
-      default: 'NEXTGEN',
+      default: 'Build2Pitch',
     },
     tagline: {
       type: String,

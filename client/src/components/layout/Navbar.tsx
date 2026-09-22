@@ -134,7 +134,7 @@ export const Navbar: React.FC = () => {
                 to="/register"
                 className="px-4 py-2 rounded-lg text-sm font-bold bg-primary text-background hover:bg-primary-hover shadow-glow-sm transition-all"
               >
-                Join NEXTGEN
+                Join Build2Pitch
               </Link>
             </div>
           )}
@@ -226,7 +226,7 @@ export const Navbar: React.FC = () => {
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold bg-primary text-background hover:bg-primary-hover transition-all mt-2"
                   >
-                    Join NEXTGEN
+                    Join Build2Pitch
                   </Link>
                 </>
               )}

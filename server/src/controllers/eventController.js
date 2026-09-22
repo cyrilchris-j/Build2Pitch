@@ -12,7 +12,7 @@ exports.getSettings = async (req, res) => {
     if (!settings) {
       // Return default settings if none exist
       settings = {
-        eventName: 'NEXTGEN',
+        eventName: 'Build2Pitch',
         tagline: "Shape What's Next.",
         startTime: null,
         endTime: null,

@@ -76,7 +76,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div>
             <h1 className="text-xl font-black text-foreground tracking-tight">Control Center</h1>
             <p className="text-xs text-foreground-muted">
-              NEXTGEN 2026 — Event Administration
+              Build2Pitch 2026 — Event Administration
               {lastFetch && <span className="ml-2 text-foreground-subtle">Updated: {lastFetch}</span>}
             </p>
           </div>

@@ -199,7 +199,7 @@ export const LandingPage: React.FC = () => {
   ];
 
   const faqs = [
-    { q: 'Who can participate in NEXTGEN?', a: 'All 3rd-year engineering students from any department. Teams must be exactly 6 members, with at least 1 female participant.' },
+    { q: 'Who can participate in Build2Pitch?', a: 'All 3rd-year engineering students from any department. Teams must be exactly 6 members, with at least 1 female participant.' },
     { q: 'What do we build in one day?', a: 'A real startup product with a working demo, branding package, and pitch deck — all built from scratch based on your assigned idea from the vault.' },
     { q: 'How does the idea roll work?', a: 'Each team gets 2 dice rolls to claim a unique startup idea. Once your team locks an idea, no other team can get it. The roll is atomic and fair.' },
     { q: 'Can we use AI tools and no-code platforms?', a: 'Yes! You are encouraged to use any tools — AI assistants, no-code builders, design tools, etc. What matters is the final product and pitch quality.' },
@@ -323,7 +323,7 @@ export const LandingPage: React.FC = () => {
             One Day. Real Startup.
           </h2>
           <p className="text-foreground-muted max-w-2xl mx-auto leading-relaxed">
-            NEXTGEN is not a hackathon — it's an entrepreneurship simulation. Your team will build
+            Build2Pitch is not a hackathon — it's an entrepreneurship simulation. Your team will build
             a complete startup: product, brand identity, business model, and investor pitch.
           </p>
         </motion.div>
@@ -563,11 +563,11 @@ export const LandingPage: React.FC = () => {
               <Zap className="h-4 w-4 text-background" />
             </div>
             <span className="font-display text-base font-black tracking-tight">
-              NEXT<span className="text-primary">GEN</span>
+              BUILD<span className="text-primary">2PITCH</span>
             </span>
           </div>
           <p className="text-xs text-foreground-subtle text-center">
-            NEXTGEN 2026 — Build2Pitch College Innovation Platform.<br className="sm:hidden" />
+            Build2Pitch 2026 — College Innovation Challenge.<br className="sm:hidden" />
             Shape What's Next.
           </p>
           <div className="flex items-center gap-4 text-xs text-foreground-subtle">

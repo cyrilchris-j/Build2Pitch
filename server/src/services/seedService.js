@@ -37,7 +37,7 @@ async function seedIfEmpty() {
     const eventEnd = new Date('2026-09-23T14:30:00.000Z');   // 8:00 PM IST
 
     await EventSettings.create({
-      eventName: 'NEXTGEN',
+      eventName: 'Build2Pitch',
       tagline: "Shape What's Next.",
       startTime: eventStart,
       endTime: eventEnd,

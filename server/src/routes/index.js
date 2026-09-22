@@ -13,7 +13,7 @@ router.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: 'NEXTGEN by BUILD2PITCH — Backend API',
+    service: 'BUILD2PITCH — Backend API',
     version: '1.0.0',
   });
 });

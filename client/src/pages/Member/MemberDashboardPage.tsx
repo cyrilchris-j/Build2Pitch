@@ -66,7 +66,7 @@ export const MemberDashboardPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs text-foreground-subtle uppercase tracking-wider font-semibold mb-0.5">
-              NEXTGEN 2026 — Member Dashboard
+              Build2Pitch 2026 — Member Dashboard
             </p>
             <h1 className="text-xl font-black text-foreground tracking-tight">
               Welcome, {user?.name?.split(' ')[0]}
