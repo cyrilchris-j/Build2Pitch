@@ -34,11 +34,21 @@ const API_BASE_URL = getValidApiBaseUrl();
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  timeout: 60000, // 60 seconds to allow Render free tier cold-start wake-up
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+/**
+ * Fire-and-forget background ping to wake up free-tier backend (e.g. on Render)
+ * as soon as the user opens the frontend.
+ */
+export function warmUpBackend(): void {
+  apiClient.get('/health').catch(() => {
+    // Non-blocking background warm-up
+  });
+}
 
 const TEAM_KEY = 'build2pitch_team_id';
 const TEAM_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
@@ -101,6 +111,8 @@ apiClient.interceptors.response.use(
         errorMessage = 'Invalid backend API URL configuration. Please check your VITE_API_URL environment variable.';
       } else if (error.code === 'ERR_NETWORK' || errorMessage.includes('Network Error')) {
         errorMessage = 'Unable to connect to the server. Please ensure the backend is running and online.';
+      } else if (error.code === 'ECONNABORTED' || errorMessage.toLowerCase().includes('timeout')) {
+        errorMessage = 'Server response timed out. If the backend is waking up from sleep (Render free tier takes ~30–50s on initial wake), please try again now.';
       }
     }
 

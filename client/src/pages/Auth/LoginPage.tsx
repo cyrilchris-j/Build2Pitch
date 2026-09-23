@@ -197,6 +197,11 @@ export const LoginPage: React.FC = () => {
                 </>
               )}
             </button>
+            {isLoading && (
+              <p className="mt-2.5 text-center text-xs text-[#8A8A8A] animate-pulse">
+                Connecting to server... If the backend is waking up, please allow a few moments.
+              </p>
+            )}
           </div>
         </form>
 
