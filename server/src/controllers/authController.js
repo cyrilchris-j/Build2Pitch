@@ -183,8 +183,19 @@ exports.memberLogin = async (req, res) => {
     }
 
     const role = normalizeRole(user.role);
-    if (role !== 'TEAM_MEMBER' && role !== 'TEAM_LEAD') {
-      return errorResponse(res, 'Please use the appropriate login portal for your role', 403);
+    if (role !== 'TEAM_MEMBER') {
+      if (role === 'TEAM_LEAD') {
+        return errorResponse(
+          res,
+          'Access denied: You are registered as a Team Lead. Please sign in via the Team Lead Login portal.',
+          403
+        );
+      }
+      return errorResponse(
+        res,
+        'Access denied: This login portal is strictly for Team Members.',
+        403
+      );
     }
 
     let team = null;
@@ -289,6 +300,25 @@ exports.login = async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return errorResponse(res, 'Invalid email or password', 401);
+    }
+
+    const role = normalizeRole(user.role);
+    if (role !== 'TEAM_LEAD') {
+      if (role === 'TEAM_MEMBER') {
+        return errorResponse(
+          res,
+          'Access denied: You are registered as a Team Member. Please sign in via the Team Member Login portal (/member-login).',
+          403
+        );
+      }
+      if (role === 'ADMIN') {
+        return errorResponse(
+          res,
+          'Access denied: Administrator accounts must sign in via the Admin Login portal (/admin/login).',
+          403
+        );
+      }
+      return errorResponse(res, 'Please use the appropriate login portal for your role', 403);
     }
 
     let team = null;

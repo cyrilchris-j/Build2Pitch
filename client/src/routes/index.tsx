@@ -46,11 +46,11 @@ export const AppRoutes: React.FC = () => {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/member-login" element={<MemberLoginPage />} />
 
-      {/* Member Portal Route */}
+      {/* Member Portal Route (Strictly for Team Members) */}
       <Route
         path="/member/dashboard"
         element={
-          <ProtectedRoute allowedRoles={['TEAM_MEMBER', 'member', 'TEAM_LEAD', 'team_lead']}>
+          <ProtectedRoute allowedRoles={['TEAM_MEMBER', 'member']}>
             <MemberDashboardPage />
           </ProtectedRoute>
         }

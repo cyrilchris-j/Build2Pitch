@@ -54,6 +54,13 @@ export const MemberLoginPage: React.FC = () => {
 
       if (response.data && response.data.success && response.data.data) {
         const { token, user, team } = response.data.data;
+        const userRole = (user.role || '').toUpperCase();
+        if (userRole === 'TEAM_LEAD') {
+          setErrorMessage('Access denied: You are registered as a Team Lead. Please sign in via the Team Lead Login portal.');
+          setIsLoading(false);
+          return;
+        }
+
         setSuccessNotice(true);
 
         login(token, user, team || null);

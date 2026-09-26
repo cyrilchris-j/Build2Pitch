@@ -120,7 +120,8 @@ export const MemberDashboardPage: React.FC = () => {
               <div className="px-5 py-3">
                 <InfoRow icon={Users} label="Team Name" value={team.name} />
                 <InfoRow icon={Hash} label="Team Number" value={team.teamNumber ? `#${team.teamNumber}` : undefined} />
-                <InfoRow icon={User} label="Members" value={`${(team.membersCount || 0) + 1} / 6`} />
+                <InfoRow icon={User} label="Team Lead" value={typeof (team as any).leaderId === 'object' && (team as any).leaderId?.name ? (team as any).leaderId.name : undefined} />
+                <InfoRow icon={Users} label="Members" value={`${team.membersCount ?? members.length ?? 0} / 6 (2–6 allowed)`} />
                 <InfoRow icon={Layers} label="Table" value={team.tableNumber || 'TBA'} />
               </div>
 

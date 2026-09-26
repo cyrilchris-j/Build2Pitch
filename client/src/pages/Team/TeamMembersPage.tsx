@@ -145,7 +145,7 @@ export const TeamMembersPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const isTeamLead = user?.role?.toUpperCase() === 'TEAM_LEAD';
-  // Standard 6-member team: 1 Team Lead + 5 Team Members = 6 total members
+  const MIN_TEAM_SIZE = 2;
   const MAX_TEAM_SIZE = 6;
   const memberCount = members.length;
   const canAddMore = memberCount < MAX_TEAM_SIZE && isTeamLead;
@@ -232,13 +232,6 @@ export const TeamMembersPage: React.FC = () => {
     }
   };
 
-  const genderCount = { MALE: 0, FEMALE: 0, OTHER: 0 };
-  members.forEach((m) => {
-    const g = (m.gender || 'MALE').toUpperCase();
-    if (g in genderCount) genderCount[g as keyof typeof genderCount]++;
-  });
-  const hasFemale = genderCount.FEMALE > 0;
-
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       {/* Header */}
@@ -250,29 +243,33 @@ export const TeamMembersPage: React.FC = () => {
           <div>
             <h1 className="text-xl font-black text-foreground tracking-tight">Team Members</h1>
             <p className="text-xs text-foreground-muted">
-              {memberCount}/{MAX_TEAM_SIZE} members registered ({MAX_TEAM_SIZE - memberCount > 0 ? `${MAX_TEAM_SIZE - memberCount} slot${MAX_TEAM_SIZE - memberCount > 1 ? 's' : ''} remaining` : 'Full roster'})
+              {memberCount}/{MAX_TEAM_SIZE} members registered (Team size: 2 to 6 members allowed)
             </p>
           </div>
         </div>
         <ProgressBar
           value={memberCount}
           max={MAX_TEAM_SIZE}
-          color={memberCount >= MAX_TEAM_SIZE ? 'success' : 'primary'}
+          color={memberCount >= MIN_TEAM_SIZE ? 'success' : 'primary'}
           className="mt-3"
         />
       </div>
 
-      {/* Gender compliance warning */}
-      {!hasFemale && memberCount > 0 && (
+      {/* Team Size Status Banner */}
+      {memberCount < MIN_TEAM_SIZE && (
         <div className="mb-4 p-3 rounded-xl border border-warning/30 bg-warning/5 flex items-center gap-2 text-warning text-sm">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>At least 1 female member is required per team rule.</span>
+          <span>
+            Team size rule: Teams can have 2 to 6 members (including Team Lead). Please add at least {MIN_TEAM_SIZE - memberCount} more member{MIN_TEAM_SIZE - memberCount > 1 ? 's' : ''} to meet the minimum requirement.
+          </span>
         </div>
       )}
-      {hasFemale && (
+      {memberCount >= MIN_TEAM_SIZE && (
         <div className="mb-4 p-3 rounded-xl border border-success/30 bg-success/5 flex items-center gap-2 text-success text-sm">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>Gender requirement met — team has {genderCount.FEMALE} female member{genderCount.FEMALE > 1 ? 's' : ''}.</span>
+          <span>
+            Team requirement satisfied — {memberCount}/{MAX_TEAM_SIZE} members registered (2 to 6 members allowed, no gender restrictions).
+          </span>
         </div>
       )}
 

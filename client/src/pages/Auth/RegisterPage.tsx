@@ -141,7 +141,7 @@ export const RegisterPage: React.FC = () => {
                 Team Lead Registration
               </h1>
               <p className="text-xs text-[#8A8A8A] mt-0.5">
-                Register your startup venture & designated 6-member team
+                Register your startup venture & build your 2 to 6 member team
               </p>
             </div>
           </div>

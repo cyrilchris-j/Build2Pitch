@@ -58,6 +58,14 @@ export const LoginPage: React.FC = () => {
 
       if (response.data && response.data.success && response.data.data) {
         const { token, user, team } = response.data.data;
+        const role = (user.role || '').toUpperCase();
+
+        if (role === 'TEAM_MEMBER' || role === 'MEMBER') {
+          setErrorMessage('Access denied: You are registered as a Team Member. Please sign in via the Team Member Login portal (/member-login).');
+          setIsLoading(false);
+          return;
+        }
+
         setSuccessNotice(true);
 
         login(token, user, team || null);
@@ -67,11 +75,8 @@ export const LoginPage: React.FC = () => {
           if (fromPath) {
             navigate(fromPath, { replace: true });
           } else {
-            const role = (user.role || '').toUpperCase();
             if (role === 'ADMIN') {
               navigate('/admin/dashboard', { replace: true });
-            } else if (role === 'TEAM_MEMBER' || role === 'MEMBER') {
-              navigate('/member/dashboard', { replace: true });
             } else {
               navigate('/team/dashboard', { replace: true });
             }

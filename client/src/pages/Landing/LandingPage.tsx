@@ -152,7 +152,7 @@ export const LandingPage: React.FC = () => {
   const steps = [
     {
       title: 'Form Your Squad',
-      desc: 'Team Lead registers and adds 5 members. Each person gets their own account and access credentials.',
+      desc: 'Team Lead registers and adds 1 to 5 members (2 to 6 members total). Each person gets their own account and access credentials.',
       icon: Users,
       color: 'bg-gradient-to-br from-primary to-primary-dark',
     },
@@ -200,18 +200,18 @@ export const LandingPage: React.FC = () => {
   ];
 
   const faqs = [
-    { q: 'Who can participate in Build2Pitch?', a: 'All 3rd-year engineering students from any department. Teams must be exactly 6 members, with at least 1 female participant.' },
+    { q: 'Who can participate in Build2Pitch?', a: 'All 3rd-year engineering students from any department. Teams can have between 2 to 6 members, with no gender restrictions.' },
     { q: 'What do we build in one day?', a: 'A real startup product with a working demo, branding package, and pitch deck — all built from scratch based on your assigned idea from the vault.' },
     { q: 'How does the idea roll work?', a: 'Each team gets 2 dice rolls to claim a unique startup idea. Once your team locks an idea, no other team can get it. The roll is atomic and fair.' },
     { q: 'Can we use AI tools and no-code platforms?', a: 'Yes! You are encouraged to use any tools — AI assistants, no-code builders, design tools, etc. What matters is the final product and pitch quality.' },
     { q: 'How are winners chosen?', a: 'Judges evaluate presentation, product demo, business model, design, branding, and teamwork. Multiple award categories exist — innovation, design, technical depth, best pitch, etc.' },
-    { q: 'What is the Team Lead responsible for?', a: 'The Team Lead registers the team, adds all 5 members, rolls and locks the idea, and submits the final deliverables. Members get read-only access to track progress.' },
+    { q: 'What is the Team Lead responsible for?', a: 'The Team Lead registers the team, adds team members (2 to 6 members total), rolls and locks the idea, and submits the final deliverables. Members get read-only access to track progress.' },
     { q: 'Is prior startup or coding experience required?', a: 'Not at all. Teams need a diverse mix of skills — a coder, a designer, a pitcher, a researcher, and a marketer. Multidisciplinary teams perform best.' },
   ];
 
   const rules = [
-    'Teams must have exactly 6 members (including the Team Lead)',
-    'At least 1 female participant is required per team',
+    'Teams can have between 2 to 6 members (including the Team Lead)',
+    'No gender restrictions — open to all team compositions',
     'Each team gets a maximum of 2 idea roll attempts',
     'All 8 deliverables must be submitted before the deadline',
     'The Team Lead can lock the submission — once final, it cannot be changed',
@@ -537,7 +537,7 @@ export const LandingPage: React.FC = () => {
               <span className="gradient-text">Build?</span>
             </h2>
             <p className="text-foreground-muted text-lg mb-10 max-w-xl mx-auto">
-              Register your 6-member team and take the first step toward building
+              Register your 2 to 6 member team and take the first step toward building
               something that could change the world.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">

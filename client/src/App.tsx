@@ -24,7 +24,7 @@ export const App: React.FC = () => {
                 BUILD<span className="text-primary font-bold">2</span>PITCH &copy; 2026 Entrepreneurship Event Platform
               </span>
               <span className="text-[11px] text-foreground-subtle">
-                Shared Foundation Architecture &bull; 6-Member Team Standard
+                Shared Foundation Architecture &bull; 2–6 Member Teams &bull; Open Roster
               </span>
             </div>
           </footer>

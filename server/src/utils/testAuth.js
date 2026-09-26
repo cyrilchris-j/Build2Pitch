@@ -182,6 +182,28 @@ async function runAuthTests() {
     assert(memberLoginData.data.user.role === 'TEAM_MEMBER', 'Member role is TEAM_MEMBER');
     const memberToken = memberLoginData.data.token;
 
+    // 3.2 Team Lead trying to log in via member-login (Must be rejected with 403)
+    const leadAtMemberLoginRes = await fetch(`${baseUrl}/member-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'test.leader@build2pitch.dev',
+        password: samplePass,
+      }),
+    });
+    assert(leadAtMemberLoginRes.status === 403, 'Team Lead rejected at /member-login with 403');
+
+    // 3.3 Team Member trying to log in via lead login /login (Must be rejected with 403)
+    const memberAtLeadLoginRes = await fetch(`${baseUrl}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'test.member@build2pitch.dev',
+        password: memberPass,
+      }),
+    });
+    assert(memberAtLeadLoginRes.status === 403, 'Team Member rejected at /login with 403');
+
     console.log('\nTEST SUITE 4: Admin Login & Security Gateway');
 
     // Create a demo admin

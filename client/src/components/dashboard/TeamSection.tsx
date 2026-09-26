@@ -57,10 +57,10 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ data }) => {
             <span>TEAM ROSTER</span>
           </div>
           <Badge
-            variant={count === 6 ? 'success' : 'accent'}
-            className={count === 6 ? '' : 'bg-[#E63946]/15 text-[#E63946] border-[#E63946]/30'}
+            variant={count >= 2 ? 'success' : 'accent'}
+            className={count >= 2 ? '' : 'bg-[#E63946]/15 text-[#E63946] border-[#E63946]/30'}
           >
-            SLOT {count} / 6
+            {count} / 6 MEMBERS {count >= 2 ? '(VALID TEAM)' : '(MIN 2 REQUIRED)'}
           </Badge>
         </div>
         <CardTitle className="text-white">Your Startup Crew</CardTitle>
@@ -106,8 +106,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ data }) => {
             </div>
             {members.length < 6 && (
               <p className="pt-3 text-xs text-[#8A8A8A]">
-                {6 - members.length} open slot{6 - members.length === 1 ? '' : 's'} remaining to reach the full
-                6-member squad.
+                {6 - members.length} open slot{6 - members.length === 1 ? '' : 's'} remaining (Teams can have 2 to 6 members).
               </p>
             )}
           </>
