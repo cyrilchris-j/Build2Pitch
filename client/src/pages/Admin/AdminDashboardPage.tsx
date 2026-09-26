@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { PageContainer } from '@/components/layout/PageContainer';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { adminService } from '@/services/api';
+import { StatCard } from '@/components/ui/StatCard';
+import { SkeletonCard } from '@/components/ui/Skeleton';
+import { EventCountdown } from '@/components/countdown/EventCountdown';
+import { useEventSettings } from '@/hooks/useEventSettings';
 import {
   Users,
   GraduationCap,
@@ -10,7 +13,8 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  TrendingUp,
+  RefreshCw,
+  ArrowRight,
   Shield,
 } from 'lucide-react';
 
@@ -18,6 +22,7 @@ interface StatsData {
   totalTeams: number;
   totalStudents: number;
   ideasAssigned: number;
+  ideasRemaining?: number;
   submitted: number;
   inProgress: number;
   incomplete: number;
@@ -28,22 +33,26 @@ export const AdminDashboardPage: React.FC = () => {
     totalTeams: 0,
     totalStudents: 0,
     ideasAssigned: 0,
+    ideasRemaining: 30,
     submitted: 0,
     inProgress: 0,
     incomplete: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [lastFetch, setLastFetch] = useState<string>('');
+  const { settings } = useEventSettings();
 
   useEffect(() => {
     fetchStats();
   }, []);
 
   const fetchStats = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const response = await adminService.getStats();
       if (response.data?.data) {
-        setStats(response.data.data);
+        setStats(response.data.data as StatsData);
+        setLastFetch(new Date().toLocaleTimeString('en-IN'));
       }
     } catch (err) {
       console.error('Failed to fetch admin stats:', err);
@@ -52,128 +61,141 @@ export const AdminDashboardPage: React.FC = () => {
     }
   };
 
-  const statCards = [
-    {
-      title: 'TOTAL TEAMS',
-      value: stats.totalTeams,
-      icon: Users,
-      description: 'Registered participating teams',
-    },
-    {
-      title: 'TOTAL STUDENTS',
-      value: stats.totalStudents,
-      icon: GraduationCap,
-      description: 'Active student participants',
-    },
-    {
-      title: 'IDEAS ASSIGNED',
-      value: stats.ideasAssigned,
-      icon: Lightbulb,
-      description: 'Startup challenges allocated',
-    },
-    {
-      title: 'SUBMITTED',
-      value: stats.submitted,
-      icon: CheckCircle2,
-      description: 'Finalized & locked projects',
-    },
-    {
-      title: 'IN PROGRESS',
-      value: stats.inProgress,
-      icon: Clock,
-      description: 'Active deliverable drafts',
-    },
-    {
-      title: 'INCOMPLETE',
-      value: stats.incomplete,
-      icon: AlertCircle,
-      description: 'Pending submission setup',
-    },
-  ];
-
   return (
-    <PageContainer
-      title="Admin Command Center"
-      subtitle="Real-time pulse of teams, student rosters, idea distribution, and startup submissions."
-      actions={
-        <div className="flex items-center gap-2">
-          <Badge variant="accent" className="gap-1.5 py-1 px-3">
-            <Shield className="h-3.5 w-3.5" /> ADMIN ACCESS ONLY
-          </Badge>
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between mb-8 gap-4"
+      >
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-2xl bg-purple/10 border border-purple/20 flex items-center justify-center">
+            <Shield className="h-5 w-5 text-purple-light" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-foreground tracking-tight">Control Center</h1>
+            <p className="text-xs text-foreground-muted">
+              Build2Pitch 2026 — Event Administration
+              {lastFetch && <span className="ml-2 text-foreground-subtle">Updated: {lastFetch}</span>}
+            </p>
+          </div>
         </div>
-      }
-    >
-      {/* 6 Statistic Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {statCards.map((card, idx) => {
-          const Icon = card.icon;
-          return (
-            <Card key={idx} className="bg-[#111111] border-[#242424] hover:border-[#333333] transition-colors">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#8A8A8A]">
-                  {card.title}
-                </span>
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#111111] border border-[#242424] text-[#E63946]">
-                  <Icon className="h-5 w-5" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-extrabold text-[#FFFFFF] font-display">
-                  {isLoading ? '...' : card.value}
-                </div>
-                <p className="text-xs text-[#8A8A8A] mt-1">{card.description}</p>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+        <button
+          onClick={fetchStats}
+          disabled={isLoading}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-sm text-foreground-muted hover:text-foreground hover:bg-card transition-all disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <span className="hidden sm:inline">Refresh</span>
+        </button>
+      </motion.div>
 
-      {/* System Status & Pipeline Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="bg-[#111111] border-[#242424]">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-[#E63946]">
-              <TrendingUp className="h-5 w-5" />
-              <CardTitle className="text-[#FFFFFF]">Submission Pipeline Overview</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-[#8A8A8A]">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-[#070707] border border-[#242424]">
-              <span className="text-[#FFFFFF]">Final Locked Submissions</span>
-              <span className="font-mono font-bold text-[#E63946]">{stats.submitted} Teams</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-[#070707] border border-[#242424]">
-              <span className="text-[#FFFFFF]">In-Progress Deliverable Drafts</span>
-              <span className="font-mono font-bold text-[#FFFFFF]">{stats.inProgress} Teams</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-[#070707] border border-[#242424]">
-              <span className="text-[#FFFFFF]">Incomplete / Not Started</span>
-              <span className="font-mono font-bold text-[#8A8A8A]">{stats.incomplete} Teams</span>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            <StatCard
+              label="Total Teams"
+              value={stats.totalTeams}
+              icon={<Users className="h-5 w-5" />}
+              color="primary"
+            />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+            <StatCard
+              label="Total Students"
+              value={stats.totalStudents}
+              icon={<GraduationCap className="h-5 w-5" />}
+              color="accent"
+            />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.11 }}>
+            <StatCard
+              label="Ideas Assigned"
+              value={stats.ideasAssigned}
+              subValue={`${stats.ideasRemaining ?? '—'} remaining`}
+              icon={<Lightbulb className="h-5 w-5" />}
+              color="warning"
+            />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}>
+            <StatCard
+              label="Submitted"
+              value={stats.submitted}
+              icon={<CheckCircle2 className="h-5 w-5" />}
+              color="success"
+            />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}>
+            <StatCard
+              label="In Progress"
+              value={stats.inProgress}
+              icon={<Clock className="h-5 w-5" />}
+              color="accent"
+            />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.20 }}>
+            <StatCard
+              label="Not Started"
+              value={stats.incomplete}
+              icon={<AlertCircle className="h-5 w-5" />}
+              color="danger"
+            />
+          </motion.div>
+        </div>
+      )}
 
-        <Card className="bg-[#111111] border-[#242424]">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-[#E63946]">
-              <Shield className="h-5 w-5" />
-              <CardTitle className="text-[#FFFFFF]">Security &amp; Authorization Enforcements</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 text-xs text-[#8A8A8A]">
-            <div className="p-3 rounded-lg bg-[#070707] border border-[#242424] space-y-1">
-              <span className="font-bold text-[#FFFFFF] block">Backend Authorization</span>
-              <p>Every admin endpoint strictly validates JWT claims with <code className="text-[#E63946]">requireAuth + requireRole("ADMIN")</code>.</p>
-            </div>
-            <div className="p-3 rounded-lg bg-[#070707] border border-[#242424] space-y-1">
-              <span className="font-bold text-[#FFFFFF] block">Submission State Guard</span>
-              <p>Locked submissions cannot be mutated by Team Leads or Members once final submission is performed.</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Bottom row: Countdown + Quick Links */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Event Countdown */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          <EventCountdown settings={settings} />
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-card border border-border rounded-2xl overflow-hidden"
+        >
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="text-sm font-bold text-foreground">Quick Actions</h2>
+          </div>
+          <div className="p-4 space-y-2">
+            {[
+              { to: '/admin/teams', label: 'View All Teams', desc: 'Browse registered teams', icon: Users, color: 'text-primary' },
+              { to: '/admin/ideas', label: 'Manage Ideas', desc: 'Add, edit, or disable ideas', icon: Lightbulb, color: 'text-warning' },
+              { to: '/admin/submissions', label: 'Review Submissions', desc: 'Check deliverables', icon: CheckCircle2, color: 'text-success' },
+              { to: '/admin/students', label: 'Student Directory', desc: 'All registered students', icon: GraduationCap, color: 'text-accent' },
+            ].map(({ to, label, desc, icon: Icon, color }) => (
+              <Link
+                key={to}
+                to={to}
+                className="flex items-center justify-between p-3 rounded-xl hover:bg-background transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`h-8 w-8 rounded-lg bg-card-hover border border-border flex items-center justify-center shrink-0`}>
+                    <Icon className={`h-4 w-4 ${color}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{label}</p>
+                    <p className="text-xs text-foreground-muted">{desc}</p>
+                  </div>
+                </div>
+                <ArrowRight className="h-4 w-4 text-foreground-subtle group-hover:text-foreground group-hover:translate-x-1 transition-all" />
+              </Link>
+            ))}
+          </div>
+        </motion.div>
       </div>
-    </PageContainer>
+    </div>
   );
 };
-
-export default AdminDashboardPage;

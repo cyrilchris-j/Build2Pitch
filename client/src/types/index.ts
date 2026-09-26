@@ -1,21 +1,22 @@
 /**
- * BUILD2PITCH - Shared TypeScript Types and Domain Models
+ * BUILD2PITCH NEXTGEN — Shared TypeScript Types and Domain Models
  */
 
 // ==========================================
 // 1. User & Authentication Types
 // ==========================================
 
-export type UserRole = 
-  | 'ADMIN' 
-  | 'TEAM_LEAD' 
-  | 'TEAM_MEMBER' 
-  | 'admin' 
-  | 'team_lead' 
+export type UserRole =
+  | 'ADMIN'
+  | 'TEAM_LEAD'
+  | 'TEAM_MEMBER'
+  | 'admin'
+  | 'team_lead'
   | 'member';
 
 export interface User {
   id: string;
+  _id?: string;
   name: string;
   email: string;
   role: UserRole;
@@ -24,7 +25,7 @@ export interface User {
   gender?: string | null;
   section?: string | null;
   teamId?: string | null;
-  avatarUrl?: string | null;
+  isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -41,6 +42,16 @@ export interface RegisterPayload {
   teamName: string;
 }
 
+export interface AddMemberPayload {
+  name: string;
+  registerNumber: string;
+  email: string;
+  mobile: string;
+  gender: string;
+  section: string;
+  password: string;
+}
+
 export interface LoginPayload {
   email: string;
   password: string;
@@ -52,26 +63,29 @@ export interface AuthResponseData {
   team?: Team | null;
 }
 
-
 // ==========================================
 // 2. Team Member Types
 // ==========================================
 
-export type MemberSpecialization = 
-  | 'leader' 
-  | 'developer' 
-  | 'designer' 
-  | 'pitcher' 
-  | 'researcher' 
+export type MemberSpecialization =
+  | 'leader'
+  | 'developer'
+  | 'designer'
+  | 'pitcher'
+  | 'researcher'
   | 'marketer';
 
 export interface TeamMember {
   id: string;
+  userId?: string | null;
   name: string;
   email: string;
   role: MemberSpecialization;
+  registerNumber?: string;
+  mobile?: string;
+  gender?: string;
+  section?: string;
   isRegisteredUser?: boolean;
-  userId?: string;
   joinedAt: string;
 }
 
@@ -87,14 +101,17 @@ export interface StartupIdea {
   title: string;
   shortDescription?: string;
   category?: string;
-  industry: string;
+  industry?: string;
   problemStatement: string;
-  targetAudience: string;
-  keyFeatures: string[];
-  revenueModel: string;
+  targetUsers?: string;
+  targetAudience?: string;
+  keyFeatures?: string[];
+  revenueModel?: string;
+  difficulty?: string;
   complexityLevel?: IdeaComplexity;
   isAssigned: boolean;
-  assignedTeamId?: string;
+  isActive?: boolean;
+  assignedTeamId?: string | null;
   createdAt: string;
 }
 
@@ -133,12 +150,14 @@ export interface LockedIdeaResult {
 
 export interface IdeaAssignment {
   id?: string;
-  ideaId: string;
-  ideaTitle: string;
-  industry: string;
-  assignedAt: string;
-  isRevealed: boolean;
+  ideaId?: string;
+  ideaTitle?: string;
+  category?: string;
+  industry?: string;
+  assignedAt?: string;
+  isRevealed?: boolean;
   revealTime?: string;
+  status?: IdeaRollStatus;
   ideaDetails?: StartupIdea;
 }
 
@@ -146,23 +165,25 @@ export interface IdeaAssignment {
 // 6. Submission Types
 // ==========================================
 
+export type SubmissionStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED' | 'LOCKED';
+
 export interface Submission {
   id?: string;
   _id?: string;
   teamId: string;
   startupName?: string;
   tagline?: string;
-  logoUrl: string;
-  visitingCardUrl: string;
-  posterUrl: string;
-  linkedinBannerUrl: string;
-  githubUrl: string;
-  deployedUrl: string;
-  videoUrl: string;
+  logoUrl?: string;
+  visitingCardUrl?: string;
+  posterUrl?: string;
+  linkedinBannerUrl?: string;
+  githubUrl?: string;
+  deployedUrl?: string;
+  videoUrl?: string;
   pitchDeckUrl?: string;
   businessModel?: string;
   finalPitchNotes?: string;
-  submissionStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED' | 'LOCKED';
+  submissionStatus: SubmissionStatus;
   isFinal: boolean;
   submittedAt?: string | null;
   score?: number | null;
@@ -174,46 +195,69 @@ export interface Submission {
 
 export interface Team {
   id: string;
-  teamNumber: number;
+  _id?: string;
+  teamNumber?: number;
   name: string;
   teamCode: string;
-  leaderId: string;
+  leaderId?: string;
+  leader?: Partial<User>;
   members: TeamMember[];
-  ideaAssignment?: IdeaAssignment;
-  submission?: Submission;
-  isLocked: boolean;
-  tableNumber?: string;
-  createdAt: string;
-  updatedAt: string;
+  ideaAssignment?: IdeaAssignment | null;
+  submission?: Submission | null;
+  isLocked?: boolean;
+  tableNumber?: string | null;
+  membersCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ==========================================
 // 8. Event Settings Types
 // ==========================================
 
-export type EventPhase = 
-  | 'registration' 
-  | 'idea_reveal' 
-  | 'building' 
-  | 'submission' 
-  | 'pitching' 
-  | 'concluded';
-
 export interface EventSettings {
   id?: string;
   eventName: string;
-  eventDate: string;
+  tagline: string;
+  startTime: string | null;   // ISO date string
+  endTime: string | null;     // ISO date string
   registrationOpen: boolean;
-  submissionDeadline: string;
-  ideasRevealed: boolean;
+  challengeOpen: boolean;
+  submissionOpen: boolean;
   maxTeamSize: number;
-  minTeamSize: number;
-  currentPhase: EventPhase;
-  bannerNotice?: string;
+  maxIdeaAttempts: number;
+  bannerNotice?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ==========================================
-// 9. API & Network Types
+// 9. Activity Log Types
+// ==========================================
+
+export type ActivityAction =
+  | 'TEAM_REGISTERED'
+  | 'MEMBER_ADDED'
+  | 'MEMBER_REMOVED'
+  | 'IDEA_ROLLED'
+  | 'IDEA_LOCKED'
+  | 'SUBMISSION_UPDATED'
+  | 'SUBMISSION_SUBMITTED'
+  | 'ADMIN_VIEWED_TEAM'
+  | 'USER_LOGIN'
+  | 'USER_LOGOUT';
+
+export interface ActivityLog {
+  id: string;
+  userId?: string;
+  teamId?: string;
+  action: ActivityAction;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}
+
+// ==========================================
+// 10. API & Network Types
 // ==========================================
 
 export interface ApiResponse<T = unknown> {
@@ -225,6 +269,7 @@ export interface ApiResponse<T = unknown> {
     total?: number;
     page?: number;
     limit?: number;
+    totalPages?: number;
   };
 }
 
@@ -234,4 +279,18 @@ export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+}
+
+// ==========================================
+// 11. Admin Types
+// ==========================================
+
+export interface AdminStats {
+  totalTeams: number;
+  totalStudents: number;
+  ideasAssigned: number;
+  ideasRemaining?: number;
+  submitted: number;
+  inProgress: number;
+  incomplete: number;
 }

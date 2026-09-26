@@ -11,7 +11,6 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
-  KeyRound,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { authService } from '@/services/api';
@@ -36,13 +35,6 @@ export const AdminLoginPage: React.FC = () => {
     if (errorMessage) setErrorMessage(null);
   };
 
-  const handleFillDemo = () => {
-    setFormData({
-      email: 'admin@build2pitch.dev',
-      password: ['admin', 'secure', 'key', '2026'].join('_'),
-    });
-    setErrorMessage(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,21 +186,17 @@ export const AdminLoginPage: React.FC = () => {
                 </>
               )}
             </button>
+            {isLoading && (
+              <p className="mt-2.5 text-center text-xs text-[#8A8A8A] animate-pulse">
+                Connecting to server... If the backend is waking up, please allow a few moments.
+              </p>
+            )}
           </div>
         </form>
 
-        {/* Quick Demo Fill & Navigation */}
-        <div className="mt-6 pt-6 border-t border-[#242424] space-y-3">
-          <button
-            type="button"
-            onClick={handleFillDemo}
-            className="w-full py-2 px-3 rounded-lg bg-[#070707] border border-[#242424] hover:border-[#E63946]/50 text-xs text-[#8A8A8A] hover:text-white flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <KeyRound className="h-3.5 w-3.5 text-[#E63946]" />
-            <span>Use Default Admin Credentials (Demo)</span>
-          </button>
-
-          <div className="text-center text-xs text-[#8A8A8A] pt-1">
+        {/* Navigation */}
+        <div className="mt-6 pt-6 border-t border-[#242424]">
+          <div className="text-center text-xs text-[#8A8A8A]">
             Looking for participant portals?{' '}
             <Link to="/login" className="text-white hover:text-[#E63946] transition-colors font-semibold">
               Team Leader Login

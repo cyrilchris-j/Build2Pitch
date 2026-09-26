@@ -4,21 +4,29 @@ const eventSettingsSchema = new mongoose.Schema(
   {
     eventName: {
       type: String,
-      default: 'BUILD2PITCH 2026',
+      default: 'Build2Pitch',
     },
-    eventDate: {
+    tagline: {
+      type: String,
+      default: 'Shape What\'s Next.',
+    },
+    startTime: {
       type: Date,
-      default: Date.now,
+      default: null,
+    },
+    endTime: {
+      type: Date,
+      default: null,
     },
     registrationOpen: {
       type: Boolean,
       default: true,
     },
-    submissionDeadline: {
-      type: Date,
-      required: true,
+    challengeOpen: {
+      type: Boolean,
+      default: false,
     },
-    ideasRevealed: {
+    submissionOpen: {
       type: Boolean,
       default: false,
     },
@@ -26,22 +34,24 @@ const eventSettingsSchema = new mongoose.Schema(
       type: Number,
       default: 6,
     },
-    minTeamSize: {
+    maxIdeaAttempts: {
       type: Number,
-      default: 1,
-    },
-    currentPhase: {
-      type: String,
-      enum: ['registration', 'idea_reveal', 'building', 'submission', 'pitching', 'concluded'],
-      default: 'registration',
+      default: 2,
     },
     bannerNotice: {
       type: String,
-      default: '',
+      default: null,
     },
   },
   {
     timestamps: true,
+    toJSON: {
+      transform: function (doc, ret) {
+        ret.id = ret._id;
+        delete ret.__v;
+        return ret;
+      },
+    },
   }
 );
 

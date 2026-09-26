@@ -1,195 +1,239 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Rocket, Shield, Users, LogIn, LogOut, Menu, X, User } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Zap,
+  LogOut,
+  User,
+  Menu,
+  X,
+  LayoutDashboard,
+  Users,
+  Lightbulb,
+  FileText,
+  Send,
+  Shield,
+  ChevronRight,
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { clsx } from 'clsx';
+
+const teamLeadLinks = [
+  { to: '/team/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/team/members', label: 'Team', icon: Users },
+  { to: '/team/idea', label: 'My Idea', icon: Lightbulb },
+  { to: '/team/instructions', label: 'Instructions', icon: FileText },
+  { to: '/team/submission', label: 'Submit', icon: Send },
+];
+
+const memberLinks = [
+  { to: '/member/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+];
+
+const adminLinks = [
+  { to: '/admin/dashboard', label: 'Control Center', icon: LayoutDashboard },
+  { to: '/admin/teams', label: 'Teams', icon: Users },
+  { to: '/admin/ideas', label: 'Ideas', icon: Lightbulb },
+  { to: '/admin/submissions', label: 'Submissions', icon: Send },
+];
 
 export const Navbar: React.FC = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const navLinks = [
-    { label: 'Event', path: '/' },
-    { label: 'Team Portal', path: '/team/dashboard', icon: Users },
-    { label: 'Member Access', path: '/member/dashboard', icon: Rocket },
-    { label: 'Admin', path: '/admin/dashboard', icon: Shield },
-  ];
+  const role = user?.role?.toUpperCase() || '';
+  const isAdmin = role === 'ADMIN';
+  const isLead = role === 'TEAM_LEAD';
+  const isMember = role === 'TEAM_MEMBER' || role === 'MEMBER';
 
-  const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
-  };
+  const navLinks = isAdmin ? adminLinks : isLead ? teamLeadLinks : isMember ? memberLinks : [];
 
   const handleLogout = () => {
     logout();
     navigate('/login');
-  };
-
-  const formatRoleBadge = (role?: string) => {
-    if (!role) return '';
-    const upper = role.toUpperCase();
-    if (upper === 'TEAM_LEAD' || upper === 'LEADER') return 'Team Lead';
-    if (upper === 'TEAM_MEMBER' || upper === 'MEMBER') return 'Member';
-    if (upper === 'ADMIN') return 'Admin';
-    return role;
+    setMobileOpen(false);
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#242424] bg-[#070707]">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#E63946] text-[#FFFFFF] font-black shadow-glow-primary transition-transform group-hover:scale-105">
-            <Rocket className="h-5 w-5 fill-[#FFFFFF]" />
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        {/* Logo */}
+        <Link
+          to={isAuthenticated ? (isAdmin ? '/admin/dashboard' : isLead ? '/team/dashboard' : '/member/dashboard') : '/'}
+          className="flex items-center gap-2.5 shrink-0 group"
+        >
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow-sm group-hover:shadow-glow-primary transition-shadow">
+            <Zap className="h-4 w-4 text-background font-bold" />
           </div>
-          <div className="flex flex-col">
-            <span className="font-display text-lg font-extrabold tracking-tight text-[#FFFFFF] transition-colors">
-              BUILD<span className="text-[#E63946]">2</span>PITCH
+          <span className="font-display text-lg font-black tracking-tight text-foreground">
+            BUILD<span className="text-primary">2</span>PITCH
+          </span>
+          {isAdmin && (
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple/10 border border-purple/30 text-purple-light text-[10px] font-bold uppercase tracking-wider">
+              <Shield className="h-3 w-3" />
+              Admin
             </span>
-            <span className="text-[10px] -mt-1 font-semibold uppercase tracking-widest text-[#8A8A8A]">
-              Startup Hackathon
-            </span>
-          </div>
+          )}
         </Link>
 
-        {/* Live Status Pill */}
-        <div className="hidden lg:flex items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 py-1 text-xs font-semibold text-[#E63946]">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E63946] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E63946]"></span>
-          </span>
-          LIVE 2026 EDITION
-        </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const active = isActive(link.path);
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  active
-                    ? 'text-[#E63946] bg-[#111111] border border-[#242424]'
-                    : 'text-[#8A8A8A] hover:text-[#FFFFFF] hover:bg-[#111111]'
-                }`}
+        {/* Desktop Nav Links */}
+        {isAuthenticated && navLinks.length > 0 && (
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map(({ to, label, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  clsx(
+                    'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150',
+                    isActive
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : 'text-foreground-muted hover:text-foreground hover:bg-card'
+                  )
+                }
               >
-                {Icon && <Icon className="h-4 w-4" />}
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </NavLink>
+            ))}
+          </div>
+        )}
 
-        {/* Action Controls */}
-        <div className="hidden md:flex items-center gap-3">
-          {isAuthenticated && user ? (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border">
-                <div className="h-7 w-7 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary text-xs font-bold">
-                  {user.name ? user.name.charAt(0).toUpperCase() : <User className="h-3.5 w-3.5" />}
+        {/* Right side */}
+        <div className="flex items-center gap-3">
+          {isAuthenticated ? (
+            <>
+              {/* User Badge */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-border">
+                <div className="h-6 w-6 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                  <User className="h-3 w-3 text-primary" />
                 </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-bold text-foreground leading-none">
-                    {user.name}
-                  </span>
-                  <span className="text-[10px] font-semibold text-primary mt-0.5 uppercase tracking-wider">
-                    {formatRoleBadge(user.role)}
-                  </span>
-                </div>
+                <span className="text-xs font-medium text-foreground-muted max-w-[120px] truncate">
+                  {user?.name?.split(' ')[0]}
+                </span>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={handleLogout}
-                className="gap-1.5 hover:border-danger/50 hover:text-danger"
+                title="Logout"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-foreground-muted hover:text-danger hover:bg-danger/10 transition-all"
               >
                 <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
-            </div>
-          ) : (
-            <>
-              <Link to="/login">
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <LogIn className="h-4 w-4" />
-                  Sign In
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button variant="primary" size="sm">
-                  Register Team
-                </Button>
-              </Link>
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </>
+          ) : (
+            <div className="hidden sm:flex items-center gap-2">
+              <Link
+                to="/login"
+                className="px-4 py-2 rounded-lg text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/register"
+                className="px-4 py-2 rounded-lg text-sm font-bold bg-primary text-background hover:bg-primary-hover shadow-glow-sm transition-all"
+              >
+                Join Build2Pitch
+              </Link>
+            </div>
           )}
-        </div>
 
-        {/* Mobile Hamburger */}
-        <div className="flex md:hidden">
+          {/* Mobile menu toggle */}
           <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 text-[#8A8A8A] hover:text-[#FFFFFF] rounded-lg focus:outline-none"
-            aria-label="Toggle Menu"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-card transition-colors"
           >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
-      </div>
+      </nav>
 
-      {/* Mobile Drawer */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden border-b border-[#242424] bg-[#070707] px-4 pt-2 pb-6 space-y-2">
-          {isAuthenticated && user && (
-            <div className="p-3 mb-2 rounded-lg bg-[#111111] border border-[#242424] flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-full bg-[#E63946]/20 border border-[#E63946]/40 flex items-center justify-center text-[#E63946] text-xs font-bold">
-                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-[#FFFFFF]">{user.name}</p>
-                <p className="text-xs text-[#E63946] font-semibold">{formatRoleBadge(user.role)}</p>
-              </div>
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden border-t border-border/60 bg-background/95 backdrop-blur-xl overflow-hidden"
+          >
+            <div className="px-4 py-4 space-y-1">
+              {isAuthenticated ? (
+                <>
+                  {/* User info */}
+                  <div className="flex items-center gap-3 px-3 py-3 mb-3 bg-card rounded-xl border border-border">
+                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{user?.name}</p>
+                      <p className="text-xs text-foreground-subtle">{user?.email}</p>
+                    </div>
+                  </div>
+
+                  {navLinks.map(({ to, label, icon: Icon }) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      onClick={() => setMobileOpen(false)}
+                      className={({ isActive }) =>
+                        clsx(
+                          'flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all',
+                          isActive
+                            ? 'bg-primary/10 text-primary border border-primary/20'
+                            : 'text-foreground-muted hover:text-foreground hover:bg-card'
+                        )
+                      }
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="h-4 w-4" />
+                        {label}
+                      </div>
+                      <ChevronRight className="h-4 w-4 opacity-40" />
+                    </NavLink>
+                  ))}
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl text-sm font-medium text-danger hover:bg-danger/10 transition-all mt-3 border border-danger/20"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-between px-3 py-3 rounded-xl text-sm text-foreground-muted hover:text-foreground hover:bg-card transition-all"
+                  >
+                    Team Lead Login
+                    <ChevronRight className="h-4 w-4 opacity-40" />
+                  </Link>
+                  <Link
+                    to="/member-login"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-between px-3 py-3 rounded-xl text-sm text-foreground-muted hover:text-foreground hover:bg-card transition-all"
+                  >
+                    Member Login
+                    <ChevronRight className="h-4 w-4 opacity-40" />
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold bg-primary text-background hover:bg-primary-hover transition-all mt-2"
+                  >
+                    Join Build2Pitch
+                  </Link>
+                </>
+              )}
             </div>
-          )}
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-base font-medium text-[#FFFFFF] hover:bg-[#111111] hover:text-[#E63946] transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="pt-4 border-t border-[#242424] flex flex-col gap-2">
-            {isAuthenticated ? (
-              <Button
-                variant="outline"
-                className="w-full text-[#E63946] border-[#E63946]/40"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  handleLogout();
-                }}
-              >
-                Sign Out
-              </Button>
-            ) : (
-              <>
-                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">Sign In</Button>
-                </Link>
-                <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="primary" className="w-full">Register Team</Button>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

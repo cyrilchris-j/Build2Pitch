@@ -20,7 +20,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({
 }) => {
   const maxWClass = {
     narrow: 'max-w-4xl',
-    default: 'max-w-[1200px]',
+    default: 'max-w-7xl',
     wide: 'max-w-screen-2xl',
     full: 'w-full',
   }[maxWidth];

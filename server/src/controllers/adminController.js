@@ -460,6 +460,92 @@ exports.deleteIdea = async (req, res) => {
 };
 
 /**
+ * GET /api/admin/teams/:id
+ * Full detail view of a single team for admin review
+ */
+exports.getTeamById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let teamData = null;
+
+    try {
+      const Team = require('../models/Team');
+      const Submission = require('../models/Submission');
+      const IdeaAssignment = require('../models/IdeaAssignment');
+      const StartupIdea = require('../models/StartupIdea');
+
+      const team = await Team.findById(id)
+        .populate('leaderId', 'name email registerNumber mobile gender section role')
+        .lean();
+
+      if (!team) {
+        return errorResponse(res, 'Team not found', 404);
+      }
+
+      // Get submission
+      const submission = await Submission.findOne({ teamId: team._id }).lean();
+
+      // Get idea assignment
+      let idea = null;
+      const assignment = await IdeaAssignment.findOne({ teamId: team._id.toString() }).lean();
+      if (assignment) {
+        idea = await StartupIdea.findById(assignment.ideaId).lean();
+      }
+
+      teamData = {
+        id: team._id.toString(),
+        teamNumber: team.teamNumber,
+        name: team.name,
+        teamCode: team.teamCode,
+        isLocked: team.isLocked,
+        tableNumber: team.tableNumber || 'Unassigned',
+        leader: team.leaderId || {},
+        members: team.members || [],
+        ideaAssignment: idea
+          ? {
+              ideaId: idea._id.toString(),
+              ideaTitle: idea.title,
+              category: idea.category || '',
+              problemStatement: idea.problemStatement || '',
+              targetUsers: idea.targetUsers || '',
+              difficulty: idea.difficulty || '',
+              assignedAt: assignment?.selectedAt,
+              status: assignment?.status,
+            }
+          : null,
+        submission: submission
+          ? {
+              submissionStatus: submission.submissionStatus,
+              isFinal: submission.isFinal,
+              logoUrl: submission.logoUrl,
+              visitingCardUrl: submission.visitingCardUrl,
+              posterUrl: submission.posterUrl,
+              linkedinBannerUrl: submission.linkedinBannerUrl,
+              githubUrl: submission.githubUrl,
+              deployedUrl: submission.deployedUrl,
+              videoUrl: submission.videoUrl,
+              pitchDeckUrl: submission.pitchDeckUrl,
+              businessModel: submission.businessModel,
+              finalPitchNotes: submission.finalPitchNotes,
+              submittedAt: submission.submittedAt,
+            }
+          : null,
+        createdAt: team.createdAt,
+      };
+    } catch (dbErr) {
+      const mock = mockTeams.find((t) => t._id === id || t.id === id);
+      if (!mock) return errorResponse(res, 'Team not found', 404);
+      teamData = mock;
+    }
+
+    return successResponse(res, teamData, 'Team detail retrieved successfully');
+  } catch (err) {
+    return errorResponse(res, 'Failed to fetch team details', 500, err);
+  }
+};
+
+/**
  * GET /api/admin/submissions
  * Review all submitted pitch decks & deliverables
  */

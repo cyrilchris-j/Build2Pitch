@@ -2,6 +2,7 @@ import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig 
 import type {
   ApiResponse,
   AuthResponseData,
+  EventSettings,
   IdeaRollResult,
   IdeaVault,
   LockedIdeaResult,
@@ -11,18 +12,43 @@ import type {
   User,
 } from '@/types';
 
-/**
- * Base API client configuration
- */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+function getValidApiBaseUrl(): string {
+  let envUrl = (import.meta.env.VITE_API_URL || '').trim();
+  if (envUrl && !envUrl.includes('<') && !envUrl.includes('>')) {
+    try {
+      if (envUrl.startsWith('/') || envUrl.startsWith('http://') || envUrl.startsWith('https://')) {
+        envUrl = envUrl.replace(/\/+$/, '');
+        if (!envUrl.endsWith('/api')) {
+          envUrl = `${envUrl}/api`;
+        }
+        return envUrl;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return import.meta.env.DEV ? 'http://localhost:5001/api' : '/api';
+}
+
+const API_BASE_URL = getValidApiBaseUrl();
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  timeout: 60000, // 60 seconds to allow Render free tier cold-start wake-up
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+/**
+ * Fire-and-forget background ping to wake up free-tier backend (e.g. on Render)
+ * as soon as the user opens the frontend.
+ */
+export function warmUpBackend(): void {
+  apiClient.get('/health').catch(() => {
+    // Non-blocking background warm-up
+  });
+}
 
 const TEAM_KEY = 'build2pitch_team_id';
 const TEAM_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
@@ -52,9 +78,6 @@ apiClient.interceptors.request.use(
     const token = localStorage.getItem('build2pitch_token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
-    } else if (config.headers && !config.headers.Authorization) {
-      // Default dev fallback token when no token exists in localStorage
-      config.headers.Authorization = 'Bearer mock_leader_token';
     }
     if (config.headers) {
       config.headers['x-team-id'] = getTeamId();
@@ -72,12 +95,26 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError<ApiResponse<unknown>>) => {
-    // Centralized API error handling
-    const errorMessage = 
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      error.message || 
+    if (error.response?.status === 401) {
+      // Token expired — clean up and redirect to login
+      localStorage.removeItem('build2pitch_token');
+    }
+
+    let errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
       'An unexpected network error occurred';
+
+    if (!error.response) {
+      if (errorMessage.includes('Invalid URL') || errorMessage.includes('Failed to construct')) {
+        errorMessage = 'Invalid backend API URL configuration. Please check your VITE_API_URL environment variable.';
+      } else if (error.code === 'ERR_NETWORK' || errorMessage.includes('Network Error')) {
+        errorMessage = 'Unable to connect to the server. Please ensure the backend is running and online.';
+      } else if (error.code === 'ECONNABORTED' || errorMessage.toLowerCase().includes('timeout')) {
+        errorMessage = 'Server response timed out. If the backend is waking up from sleep (Render free tier takes ~30–50s on initial wake), please try again now.';
+      }
+    }
 
     console.error('[API Error]:', {
       status: error.response?.status,
@@ -93,11 +130,7 @@ apiClient.interceptors.response.use(
   }
 );
 
-/**
- * API Service Placeholders
- * To be implemented as business features are developed.
- */
-
+// ─── Auth Service ─────────────────────────────────────────────────────────────
 export const authService = {
   login: async (credentials: { email: string; password: string }) => {
     return apiClient.post<ApiResponse<AuthResponseData>>('/auth/login', credentials);
@@ -116,6 +149,7 @@ export const authService = {
   },
 };
 
+// ─── Team Service ─────────────────────────────────────────────────────────────
 export const teamService = {
   getTeamDashboard: async () => {
     return apiClient.get('/teams/me');
@@ -123,14 +157,26 @@ export const teamService = {
   getMembers: async () => {
     return apiClient.get('/teams/me/members');
   },
-  addMember: async (member: Record<string, unknown>) => {
+  addMember: async (member: {
+    name: string;
+    registerNumber: string;
+    email: string;
+    mobile: string;
+    gender: string;
+    section: string;
+    password: string;
+  }) => {
     return apiClient.post('/teams/me/members', member);
+  },
+  removeMember: async (memberId: string) => {
+    return apiClient.delete(`/teams/me/members/${memberId}`);
   },
   getAssignedIdea: async () => {
     return apiClient.get('/teams/me/idea');
   },
 };
 
+// ─── Idea Roll Service ────────────────────────────────────────────────────────
 export const ideaRollService = {
   getVault: async (): Promise<IdeaVault> => {
     const res = await apiClient.get<ApiResponse<IdeaVault>>('/ideas/available');
@@ -150,6 +196,7 @@ export const ideaRollService = {
   },
 };
 
+// ─── Submission Service ───────────────────────────────────────────────────────
 export const submissionService = {
   getSubmission: async () => {
     return apiClient.get('/submissions/me');
@@ -162,12 +209,27 @@ export const submissionService = {
   },
 };
 
+// ─── Event Service ────────────────────────────────────────────────────────────
+export const eventService = {
+  getSettings: async (): Promise<EventSettings> => {
+    const res = await apiClient.get<ApiResponse<EventSettings>>('/event/settings');
+    return res.data.data as EventSettings;
+  },
+  updateSettings: async (data: Partial<EventSettings>) => {
+    return apiClient.put('/event/settings', data);
+  },
+};
+
+// ─── Admin Service ────────────────────────────────────────────────────────────
 export const adminService = {
   getStats: async () => {
     return apiClient.get('/admin/stats');
   },
   getTeams: async (params?: Record<string, unknown>) => {
     return apiClient.get('/admin/teams', { params });
+  },
+  getTeamById: async (id: string) => {
+    return apiClient.get(`/admin/teams/${id}`);
   },
   getStudents: async (params?: Record<string, unknown>) => {
     return apiClient.get('/admin/students', { params });

@@ -1,97 +1,77 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import { Rocket, CheckCircle2, CalendarX2 } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { cn } from '@/utils/cn';
+import React, { useEffect, useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Clock, Zap, CalendarDays } from 'lucide-react';
 import type { EventSettings } from '@/types';
+import { clsx } from 'clsx';
 
-/**
- * Passing a string is easiest from API data — the component accepts ISO 8601
- * strings (`new Date(...)`-parseable) or Date objects.
- */
-export type EventTimeValue = string | Date | null | undefined;
-
-export interface EventCountdownProps {
-  /** ISO 8601 string or Date — when the event opens. */
-  startTime?: EventTimeValue;
-  /** ISO 8601 string or Date — when the event closes. */
-  endTime?: EventTimeValue;
-  /** Optional event label shown under the header. */
-  eventName?: string;
-  /** Extra classes merged onto the root card. */
-  className?: string;
-  /**
-   * Optional reusable data source. When startTime/endTime are omitted they are
-   * derived from EventSettings — `eventDate` maps to start, `submissionDeadline`
-   * to end, and `eventName` to the event label.
-   */
-  settings?: EventSettings | null;
-}
-
-type CountdownPhase = 'unavailable' | 'upcoming' | 'inProgress' | 'completed';
-
-const MS_PER_MINUTE = 60 * 1000;
-const MS_PER_HOUR = 60 * MS_PER_MINUTE;
-const MS_PER_DAY = 24 * MS_PER_HOUR;
-
-const STATE_LABELS: Record<Exclude<CountdownPhase, 'unavailable'>, string> = {
-  upcoming: 'EVENT STARTS IN',
-  inProgress: 'EVENT IN PROGRESS',
-  completed: 'EVENT COMPLETED',
-};
-
-interface TimeParts {
+interface CountdownValues {
   days: number;
   hours: number;
   minutes: number;
   seconds: number;
+  isExpired: boolean;
+  isRunning: boolean;
 }
 
-const toTimestamp = (value: EventTimeValue): number | null => {
-  if (value === undefined || value === null || value === '') return null;
-  const date = typeof value === 'string' ? new Date(value) : value;
-  return Number.isNaN(date.getTime()) ? null : date.getTime();
-};
+interface EventCountdownProps {
+  settings?: EventSettings | null;
+  targetDate?: string | null; // ISO string override
+  className?: string;
+  compact?: boolean;
+}
 
-const splitTime = (milliseconds: number): TimeParts => {
-  const total = Math.max(0, Math.floor(milliseconds / 1000) * 1000);
-  return {
-    days: Math.floor(total / MS_PER_DAY),
-    hours: Math.floor((total % MS_PER_DAY) / MS_PER_HOUR),
-    minutes: Math.floor((total % MS_PER_HOUR) / MS_PER_MINUTE),
-    seconds: Math.floor((total % MS_PER_MINUTE) / 1000),
-  };
-};
+function computeCountdown(targetIso: string | null | undefined): CountdownValues {
+  if (!targetIso) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: false, isRunning: false };
+  }
 
-const pad = (value: number) => String(value).padStart(2, '0');
+  const target = new Date(targetIso).getTime();
+  const now = Date.now();
+  const diff = target - now;
 
-const TimeUnit: React.FC<{ value: number; label: string; isPadded?: boolean }> = ({
+  if (diff <= 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true, isRunning: true };
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  return { days, hours, minutes, seconds, isExpired: false, isRunning: true };
+}
+
+const DigitBlock: React.FC<{ value: number; label: string; color?: string }> = ({
   value,
   label,
-  isPadded,
+  color = 'text-primary',
 }) => {
-  const prefersReducedMotion = useReducedMotion();
-  const content = isPadded ? pad(value) : String(value);
+  const display = String(value).padStart(2, '0');
 
   return (
-    <div className="flex flex-col items-center rounded-xl border border-[#242424] bg-[#111111] px-2 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      {prefersReducedMotion ? (
-        <span className="font-display text-3xl font-black tabular-nums text-white sm:text-4xl">
-          {content}
-        </span>
-      ) : (
-        <motion.span
-          key={content}
-          initial={{ y: 8, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="font-display inline-block text-3xl font-black tabular-nums text-white sm:text-4xl"
-        >
-          {content}
-        </motion.span>
-      )}
-      <span className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A8A8A]">
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="relative">
+        <div className="flex gap-1">
+          {display.split('').map((digit, i) => (
+            <motion.div
+              key={`${digit}-${i}`}
+              initial={{ opacity: 0.5, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={clsx(
+                'w-12 sm:w-16 h-14 sm:h-20 flex items-center justify-center',
+                'bg-card border border-border rounded-xl font-display font-black text-3xl sm:text-5xl',
+                'countdown-digit shadow-card',
+                color
+              )}
+            >
+              {digit}
+            </motion.div>
+          ))}
+        </div>
+        {/* glow */}
+        <div className="absolute inset-0 rounded-xl opacity-20 blur-xl bg-primary -z-10" />
+      </div>
+      <span className="text-[10px] sm:text-xs font-bold text-foreground-subtle uppercase tracking-[0.2em]">
         {label}
       </span>
     </div>
@@ -99,105 +79,135 @@ const TimeUnit: React.FC<{ value: number; label: string; isPadded?: boolean }> =
 };
 
 export const EventCountdown: React.FC<EventCountdownProps> = ({
-  startTime,
-  endTime,
-  eventName,
-  className,
   settings,
+  targetDate,
+  className,
+  compact = false,
 }) => {
-  const startMs = toTimestamp(startTime ?? settings?.eventDate);
-  const endMs = toTimestamp(endTime ?? settings?.submissionDeadline);
-  const name = eventName ?? settings?.eventName;
+  // Resolve the target time: explicit prop → eventSettings.startTime → null
+  const resolvedTarget =
+    targetDate ??
+    (settings?.startTime ?? null);
 
-  const [now, setNow] = useState(() => Date.now());
+  const [countdown, setCountdown] = useState<CountdownValues>(() =>
+    computeCountdown(resolvedTarget)
+  );
+
+  const tick = useCallback(() => {
+    setCountdown(computeCountdown(resolvedTarget));
+  }, [resolvedTarget]);
 
   useEffect(() => {
-    setNow(Date.now());
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [startMs, endMs]);
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [tick]);
 
-  const phase = useMemo<CountdownPhase>(() => {
-    if (startMs === null || endMs === null || startMs >= endMs) return 'unavailable';
-    if (now < startMs) return 'upcoming';
-    if (now >= endMs) return 'completed';
-    return 'inProgress';
-  }, [startMs, endMs, now]);
+  if (!countdown.isRunning && !countdown.isExpired) {
+    // No event date configured
+    return (
+      <div className={clsx('bg-card border border-border rounded-2xl p-6 text-center', className)}>
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <CalendarDays className="h-5 w-5 text-foreground-subtle" />
+          <span className="text-sm text-foreground-muted font-semibold uppercase tracking-wider">
+            Event Date TBA
+          </span>
+        </div>
+        <p className="text-xs text-foreground-subtle">
+          The event schedule will be announced soon. Stay tuned.
+        </p>
+      </div>
+    );
+  }
 
-  const targetMs = phase === 'upcoming' ? startMs : phase === 'inProgress' ? endMs : null;
-  const parts: TimeParts | null = targetMs === null ? null : splitTime(targetMs - now);
+  if (countdown.isExpired) {
+    return (
+      <div
+        className={clsx(
+          'bg-card border border-primary/30 rounded-2xl p-6 text-center shadow-glow-sm',
+          className
+        )}
+      >
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <Zap className="h-5 w-5 text-primary animate-pulse" />
+          <span className="text-primary font-bold uppercase tracking-wider">
+            THE CHALLENGE IS LIVE!
+          </span>
+        </div>
+        <p className="text-sm text-foreground-muted">
+          The event has started. Build, create, and ship!
+        </p>
+      </div>
+    );
+  }
 
-  const showUnits = parts !== null;
-  const stateLabel = phase === 'unavailable' ? null : STATE_LABELS[phase];
+  if (compact) {
+    return (
+      <div className={clsx('flex items-center gap-3', className)}>
+        <Clock className="h-4 w-4 text-primary shrink-0" />
+        <span className="text-sm font-mono font-bold text-primary">
+          {String(countdown.days).padStart(2, '0')}d{' '}
+          {String(countdown.hours).padStart(2, '0')}h{' '}
+          {String(countdown.minutes).padStart(2, '0')}m{' '}
+          {String(countdown.seconds).padStart(2, '0')}s
+        </span>
+      </div>
+    );
+  }
 
   return (
-    <Card
-      glass={false}
-      className={cn(
-        'relative overflow-hidden border-[#242424] p-5 shadow-[0_0_40px_-12px_rgba(230,57,70,0.45)]',
-        className,
-      )}
-    >
-      <div className="pointer-events-none absolute -inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E63946]/60 to-transparent" />
-      <div className="pointer-events-none absolute -top-20 -right-16 h-48 w-48 rounded-full bg-[#E63946]/10 blur-3xl" />
-
-      <div className="relative flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-white">
-            <Rocket className="h-4 w-4 text-[#E63946]" />
-            <span className="font-display text-xs font-extrabold uppercase tracking-[0.2em]">
-              BUILD<span className="text-[#E63946]">2</span>PITCH
-            </span>
+    <div className={clsx('bg-card border border-border rounded-2xl overflow-hidden', className)}>
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <Clock className="h-4 w-4 text-primary" />
           </div>
+          <div>
+            <p className="text-xs text-foreground-subtle uppercase tracking-wider font-semibold">
+              The Clock Is Running
+            </p>
+            <p className="text-sm font-bold text-foreground">Time Until Build2Pitch</p>
+          </div>
+        </div>
+        <span className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+          LIVE
+        </span>
+      </div>
 
-          {phase === 'unavailable' ? (
-            <Badge variant="muted" className="border-[#242424] bg-[#111111] text-[#8A8A8A]">
-              EVENT STATUS
-            </Badge>
-          ) : (
-            <Badge className="bg-[#E63946]/15 text-[#E63946] border-[#E63946]/30 shadow-[0_0_18px_-4px_rgba(230,57,70,0.6)]">
-              {stateLabel}
-            </Badge>
-          )}
+      {/* Countdown digits */}
+      <div className="p-6 sm:p-8">
+        <div className="flex flex-wrap items-start justify-center gap-4 sm:gap-8">
+          <DigitBlock value={countdown.days} label="Days" />
+          <div className="flex items-center h-14 sm:h-20 text-2xl sm:text-4xl font-black text-foreground-subtle mt-0 sm:mt-0">
+            :
+          </div>
+          <DigitBlock value={countdown.hours} label="Hours" />
+          <div className="flex items-center h-14 sm:h-20 text-2xl sm:text-4xl font-black text-foreground-subtle">
+            :
+          </div>
+          <DigitBlock value={countdown.minutes} label="Minutes" />
+          <div className="flex items-center h-14 sm:h-20 text-2xl sm:text-4xl font-black text-foreground-subtle">
+            :
+          </div>
+          <DigitBlock value={countdown.seconds} label="Seconds" color="text-accent" />
         </div>
 
-        {name && (
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8A8A]">{name}</p>
-        )}
-
-        {showUnits ? (
-          <div
-            role="timer"
-            aria-label={`${stateLabel ?? 'Countdown'}: ${parts.days} days, ${parts.hours} hours, ${parts.minutes} minutes, ${parts.seconds} seconds`}
-            className="grid grid-cols-2 gap-3 sm:grid-cols-4"
-          >
-            <TimeUnit value={parts.days} label="DAYS" />
-            <TimeUnit value={parts.hours} label="HOURS" isPadded />
-            <TimeUnit value={parts.minutes} label="MINUTES" isPadded />
-            <TimeUnit value={parts.seconds} label="SECONDS" isPadded />
-          </div>
-        ) : phase === 'completed' ? (
-          <div className="flex flex-col items-center gap-2 py-2 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E63946]/30 bg-[#E63946]/10">
-              <CheckCircle2 className="h-6 w-6 text-[#E63946]" />
-            </div>
-            <p className="font-display text-xl font-extrabold uppercase tracking-[0.18em] text-white">
-              {STATE_LABELS.completed}
-            </p>
-            <p className="text-sm text-[#8A8A8A]">This event has concluded.</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2 py-2 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#242424] bg-[#111111]">
-              <CalendarX2 className="h-6 w-6 text-[#8A8A8A]" />
-            </div>
-            <p className="font-display text-lg font-bold uppercase tracking-[0.18em] text-white">
-              NO SCHEDULED TIME
-            </p>
-            <p className="text-sm text-[#8A8A8A]">Event time not available.</p>
-          </div>
+        {settings?.startTime && (
+          <p className="text-center text-xs text-foreground-subtle mt-6">
+            Event Date: {new Date(settings.startTime).toLocaleDateString('en-IN', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZone: 'Asia/Kolkata',
+            })} IST
+          </p>
         )}
       </div>
-    </Card>
+    </div>
   );
 };

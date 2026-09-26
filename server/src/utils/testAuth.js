@@ -31,11 +31,20 @@ async function runAuthTests() {
     }
   }
 
+  let mongod = null;
   try {
     // 1. Connect DB or start in-memory
     console.log('1. Connecting to database...');
-    await mongoose.connect(env.MONGODB_URI);
-    console.log('   Connected to database.\n');
+    try {
+      await mongoose.connect(env.MONGODB_URI, { serverSelectionTimeoutMS: 1500 });
+      console.log('   Connected to local database.\n');
+    } catch (dbErr) {
+      console.log('   Local MongoDB not reachable, launching MongoMemoryServer...');
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      mongod = await MongoMemoryServer.create();
+      await mongoose.connect(mongod.getUri());
+      console.log('   Connected to MongoMemoryServer instance.\n');
+    }
 
     // Clean test data
     await User.deleteMany({ email: /test.*@build2pitch.dev/ });
@@ -173,6 +182,28 @@ async function runAuthTests() {
     assert(memberLoginData.data.user.role === 'TEAM_MEMBER', 'Member role is TEAM_MEMBER');
     const memberToken = memberLoginData.data.token;
 
+    // 3.2 Team Lead trying to log in via member-login (Must be rejected with 403)
+    const leadAtMemberLoginRes = await fetch(`${baseUrl}/member-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'test.leader@build2pitch.dev',
+        password: samplePass,
+      }),
+    });
+    assert(leadAtMemberLoginRes.status === 403, 'Team Lead rejected at /member-login with 403');
+
+    // 3.3 Team Member trying to log in via lead login /login (Must be rejected with 403)
+    const memberAtLeadLoginRes = await fetch(`${baseUrl}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'test.member@build2pitch.dev',
+        password: memberPass,
+      }),
+    });
+    assert(memberAtLeadLoginRes.status === 403, 'Team Member rejected at /login with 403');
+
     console.log('\nTEST SUITE 4: Admin Login & Security Gateway');
 
     // Create a demo admin
@@ -245,12 +276,14 @@ async function runAuthTests() {
 
     server.close();
     await mongoose.disconnect();
+    if (mongod) await mongod.stop();
     process.exit(0);
   } catch (err) {
     console.error('\n❌ Test execution failed with error:', err);
     if (server) server.close();
     try {
       await mongoose.disconnect();
+      if (mongod) await mongod.stop();
     } catch {}
     process.exit(1);
   }

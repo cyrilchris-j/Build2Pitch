@@ -81,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ type = 'team', className }) =>
           <span className="text-[#E63946] font-semibold">Active</span>
         </div>
         <p className="leading-relaxed text-[11px] text-[#8A8A8A]">
-          6-member team incubator track. Deliverables close at event conclusion.
+          2 to 6 member team incubator track. Deliverables close at event conclusion.
         </p>
       </div>
     </aside>

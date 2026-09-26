@@ -66,13 +66,13 @@ const stagger: Variants = {
 const RULES: RuleItem[] = [
   {
     icon: Users,
-    title: 'Six Members',
-    description: 'Each team must have 6 members.',
+    title: '2 to 6 Members',
+    description: 'Each team can have between 2 to 6 members (including Team Lead).',
   },
   {
     icon: UserCheck,
-    title: 'Balanced Team',
-    description: 'Every team must include at least one boy and one girl.',
+    title: 'Open Composition',
+    description: 'No gender restrictions — all students are welcome to participate.',
   },
   {
     icon: Lightbulb,

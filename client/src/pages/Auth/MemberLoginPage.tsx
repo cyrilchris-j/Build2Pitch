@@ -54,6 +54,13 @@ export const MemberLoginPage: React.FC = () => {
 
       if (response.data && response.data.success && response.data.data) {
         const { token, user, team } = response.data.data;
+        const userRole = (user.role || '').toUpperCase();
+        if (userRole === 'TEAM_LEAD') {
+          setErrorMessage('Access denied: You are registered as a Team Lead. Please sign in via the Team Lead Login portal.');
+          setIsLoading(false);
+          return;
+        }
+
         setSuccessNotice(true);
 
         login(token, user, team || null);
@@ -189,6 +196,11 @@ export const MemberLoginPage: React.FC = () => {
                 </>
               )}
             </button>
+            {isLoading && (
+              <p className="mt-2.5 text-center text-xs text-[#8A8A8A] animate-pulse">
+                Connecting to server... If the backend is waking up, please allow a few moments.
+              </p>
+            )}
           </div>
         </form>
 
