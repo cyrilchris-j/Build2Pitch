@@ -27,11 +27,11 @@ export const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -39,10 +39,11 @@ export const AdminLayout: React.FC = () => {
       {/* Sidebar */}
       <aside
         className={clsx(
-          'fixed lg:sticky top-16 left-0 z-40 h-[calc(100vh-4rem)]',
-          'w-64 border-r border-border bg-background-subtle',
-          'flex flex-col shrink-0 transition-transform duration-300 ease-in-out',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          'fixed inset-y-0 left-0 z-40 top-16 h-[calc(100vh-4rem)]',
+          'transition-transform duration-300 ease-in-out',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          'lg:relative lg:top-auto lg:translate-x-0 lg:flex lg:flex-col',
+          'w-64 shrink-0 border-r border-border bg-background-subtle overflow-y-auto'
         )}
       >
         {/* Admin Badge */}
@@ -119,7 +120,7 @@ export const AdminLayout: React.FC = () => {
       </button>
 
       {/* Page content */}
-      <main className="flex-1 min-w-0 overflow-x-hidden">
+      <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
         <Outlet />
       </main>
     </div>

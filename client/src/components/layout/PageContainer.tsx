@@ -26,12 +26,12 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   }[maxWidth];
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-background text-foreground pb-16 overflow-hidden">
+    <div className="relative bg-background text-foreground pb-16">
       {/* Subtle ambient background */}
-      <div className="absolute inset-0 bg-hero-gradient pointer-events-none opacity-60" />
+      <div className="absolute inset-0 bg-hero-gradient pointer-events-none opacity-50" />
       <div className="absolute inset-0 grid-texture opacity-20 pointer-events-none" />
 
-      <main
+      <div
         className={cn(
           'relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8',
           maxWClass,
@@ -58,7 +58,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({
           </div>
         )}
         {children}
-      </main>
+      </div>
     </div>
   );
 };

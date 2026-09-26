@@ -13,9 +13,12 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/30 selection:text-primary-light">
+        {/* h-screen so navbar + content exactly fill the viewport.
+            The sidebar layouts use h-[calc(100vh-4rem)] to fill remaining space. */}
+        <div className="h-screen flex flex-col bg-background text-foreground font-sans selection:bg-primary/30 selection:text-primary-light overflow-hidden">
           <Navbar />
-          <div className="flex-1 flex flex-col">
+          {/* flex-1 + overflow-hidden: lets each layout manage its own scroll */}
+          <div className="flex-1 overflow-hidden">
             <AppRoutes />
           </div>
         </div>
