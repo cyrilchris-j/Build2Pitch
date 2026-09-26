@@ -29,16 +29,23 @@ const has = (value?: string | null): boolean => Boolean(value && value.trim().le
 const statusOf = (done: boolean): DeliverableStatus => (done ? 'submitted' : 'pending');
 
 export function getDashboardDeliverables(submission: DashboardSubmission | null): DeliverableItem[] {
+  const sub = submission as (DashboardSubmission & {
+    logoUrl?: string;
+    visitingCardUrl?: string;
+    posterUrl?: string;
+    linkedinBannerUrl?: string;
+    deployedUrl?: string;
+  }) | null;
+
   return [
-    { key: 'logo', label: 'Logo Design', status: statusOf(false) },
-    { key: 'visiting-card', label: 'Visiting Card', status: statusOf(false) },
-    { key: 'poster', label: 'Poster / Show Banner', status: statusOf(false) },
-    { key: 'linkedin-banner', label: 'LinkedIn Banner', status: statusOf(false) },
-    { key: 'website', label: 'Working Website', status: statusOf(has(submission?.liveDemoUrl)) },
-    { key: 'github', label: 'GitHub Repository', status: statusOf(has(submission?.githubUrl)) },
-    { key: 'deployed', label: 'Deployed Website', status: statusOf(has(submission?.liveDemoUrl)) },
-    { key: 'video', label: '5-Minute Video', status: statusOf(has(submission?.videoUrl)) },
-    { key: 'pitch', label: 'Final Pitch', status: statusOf(has(submission?.pitchDeckUrl)) },
+    { key: 'logo', label: 'Logo Drive Link', status: statusOf(has(sub?.logoUrl)) },
+    { key: 'visiting-card', label: 'Visiting Card Drive Link', status: statusOf(has(sub?.visitingCardUrl)) },
+    { key: 'poster', label: 'Poster Drive Link', status: statusOf(has(sub?.posterUrl)) },
+    { key: 'linkedin-banner', label: 'LinkedIn Banner Card Drive Link', status: statusOf(has(sub?.linkedinBannerUrl)) },
+    { key: 'github', label: 'GitHub Repository', status: statusOf(has(sub?.githubUrl)) },
+    { key: 'deployed', label: 'Deployed Website', status: statusOf(has(sub?.deployedUrl || sub?.liveDemoUrl)) },
+    { key: 'video', label: '5-Minute Startup Video', status: statusOf(has(sub?.videoUrl)) },
+    { key: 'pitch', label: 'Pitch Deck (Optional)', status: statusOf(has(sub?.pitchDeckUrl)) },
   ];
 }
 

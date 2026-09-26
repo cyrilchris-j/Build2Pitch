@@ -101,10 +101,10 @@ export const TeamSubmissionPage: React.FC = () => {
 
   const validateRequiredDeliverables = (): boolean => {
     const errors: Record<string, string> = {};
-    if (!submission.logoUrl?.trim()) errors.logoUrl = 'Logo URL is required';
-    if (!submission.visitingCardUrl?.trim()) errors.visitingCardUrl = 'Visiting Card URL is required';
-    if (!submission.posterUrl?.trim()) errors.posterUrl = 'Poster Banner URL is required';
-    if (!submission.linkedinBannerUrl?.trim()) errors.linkedinBannerUrl = 'LinkedIn Banner URL is required';
+    if (!submission.logoUrl?.trim()) errors.logoUrl = 'Logo Drive Link is required';
+    if (!submission.visitingCardUrl?.trim()) errors.visitingCardUrl = 'Visiting Card Drive Link is required';
+    if (!submission.posterUrl?.trim()) errors.posterUrl = 'Poster / Show Banner Drive Link is required';
+    if (!submission.linkedinBannerUrl?.trim()) errors.linkedinBannerUrl = 'LinkedIn Banner Card Drive Link is required';
     if (!submission.githubUrl?.trim()) errors.githubUrl = 'GitHub Repository URL is required';
     if (!submission.deployedUrl?.trim()) errors.deployedUrl = 'Deployed Website URL is required';
     if (!submission.videoUrl?.trim()) errors.videoUrl = '5-Minute Video URL is required';
@@ -245,48 +245,48 @@ export const TeamSubmissionPage: React.FC = () => {
             {/* SECTION 1: BRANDING */}
             <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-primary pb-2 border-b border-border">
               <Image className="h-5 w-5" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">1. BRANDING</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">1. BRANDING &amp; ASSETS</h3>
               <span className="text-xs text-foreground-muted font-normal ml-2 hidden sm:inline">
-                Image assets for your startup identity
+                Google Drive links for your startup branding designs (Ensure link access is set to &apos;Anyone with the link can view&apos;)
               </span>
             </div>
 
             <Input
-              label="Logo URL *"
-              placeholder="https://domain.com/logo.png"
+              label="Logo Drive Link *"
+              placeholder="https://drive.google.com/file/d/... or Google Drive link"
               value={submission.logoUrl || ''}
               onChange={(e) => handleInputChange('logoUrl', e.target.value)}
               disabled={!isTeamLead || isLocked}
               error={validationErrors.logoUrl}
-              helperText="Square 1:1 logo format"
+              helperText="Google Drive public link to square 1:1 logo format"
             />
             <Input
-              label="Visiting Card URL *"
-              placeholder="https://domain.com/visiting-card.png"
+              label="Visiting Card Drive Link *"
+              placeholder="https://drive.google.com/file/d/... or Google Drive link"
               value={submission.visitingCardUrl || ''}
               onChange={(e) => handleInputChange('visitingCardUrl', e.target.value)}
               disabled={!isTeamLead || isLocked}
               error={validationErrors.visitingCardUrl}
-              helperText="Digital visiting card asset"
+              helperText="Google Drive public link to digital visiting card asset"
             />
 
             <Input
-              label="Poster / Show Banner URL *"
-              placeholder="https://domain.com/poster.png"
+              label="Poster / Show Banner Drive Link *"
+              placeholder="https://drive.google.com/file/d/... or Google Drive link"
               value={submission.posterUrl || ''}
               onChange={(e) => handleInputChange('posterUrl', e.target.value)}
               disabled={!isTeamLead || isLocked}
               error={validationErrors.posterUrl}
-              helperText="High-res vertical or landscape banner"
+              helperText="Google Drive public link to high-res vertical or landscape banner"
             />
             <Input
-              label="LinkedIn Banner URL *"
-              placeholder="https://domain.com/linkedin-banner.png"
+              label="LinkedIn Banner Card Drive Link *"
+              placeholder="https://drive.google.com/file/d/... or Google Drive link"
               value={submission.linkedinBannerUrl || ''}
               onChange={(e) => handleInputChange('linkedinBannerUrl', e.target.value)}
               disabled={!isTeamLead || isLocked}
               error={validationErrors.linkedinBannerUrl}
-              helperText="LinkedIn header banner"
+              helperText="Google Drive public link to LinkedIn header banner card"
             />
 
             {/* SECTION 2: PRODUCT */}

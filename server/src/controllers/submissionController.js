@@ -169,10 +169,10 @@ exports.submitFinal = async (req, res) => {
 
     // Validate 7 mandatory deliverables
     const missingFields = [];
-    if (!currentData.logoUrl.trim()) missingFields.push('Logo URL');
-    if (!currentData.visitingCardUrl.trim()) missingFields.push('Visiting Card URL');
-    if (!currentData.posterUrl.trim()) missingFields.push('Poster / Show Banner URL');
-    if (!currentData.linkedinBannerUrl.trim()) missingFields.push('LinkedIn Banner URL');
+    if (!currentData.logoUrl.trim()) missingFields.push('Logo Drive Link');
+    if (!currentData.visitingCardUrl.trim()) missingFields.push('Visiting Card Drive Link');
+    if (!currentData.posterUrl.trim()) missingFields.push('Poster / Show Banner Drive Link');
+    if (!currentData.linkedinBannerUrl.trim()) missingFields.push('LinkedIn Banner Card Drive Link');
     if (!currentData.githubUrl.trim()) missingFields.push('GitHub Repository URL');
     if (!currentData.deployedUrl.trim()) missingFields.push('Deployed Website URL');
     if (!currentData.videoUrl.trim()) missingFields.push('5-Minute Video URL');

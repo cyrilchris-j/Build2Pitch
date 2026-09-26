@@ -27,14 +27,14 @@ interface DeliverableItem {
 
 function getDeliverables(sub: SubmissionItem): DeliverableItem[] {
   return [
-    { key: 'logo', label: 'Logo Asset', url: sub.logoUrl, icon: ImageIcon },
-    { key: 'card', label: 'Visiting Card', url: sub.visitingCardUrl, icon: ImageIcon },
-    { key: 'poster', label: 'Poster / Banner', url: sub.posterUrl, icon: ImageIcon },
-    { key: 'linkedin', label: 'LinkedIn Banner', url: sub.linkedinBannerUrl, icon: ImageIcon },
+    { key: 'logo', label: 'Logo Drive Link', url: sub.logoUrl, icon: ImageIcon, isLink: true },
+    { key: 'card', label: 'Visiting Card Drive Link', url: sub.visitingCardUrl, icon: ImageIcon, isLink: true },
+    { key: 'poster', label: 'Poster Drive Link', url: sub.posterUrl, icon: ImageIcon, isLink: true },
+    { key: 'linkedin', label: 'LinkedIn Banner Card Drive Link', url: sub.linkedinBannerUrl, icon: ImageIcon, isLink: true },
     { key: 'github', label: 'GitHub Repo', url: sub.githubUrl, icon: Github, isLink: true },
     { key: 'deploy', label: 'Live Website', url: sub.deployedUrl, icon: Globe, isLink: true },
     { key: 'video', label: '5-Min Pitch Video', url: sub.videoUrl, icon: Video, isLink: true },
-    { key: 'deck', label: 'Pitch Deck', url: sub.pitchDeckUrl, icon: FileText },
+    { key: 'deck', label: 'Pitch Deck', url: sub.pitchDeckUrl, icon: FileText, isLink: true },
   ].filter((d) => d.url);
 }
 
