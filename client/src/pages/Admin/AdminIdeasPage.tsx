@@ -176,6 +176,7 @@ export const AdminIdeasPage: React.FC = () => {
                 <th className="py-3.5 px-4">Industry Track</th>
                 <th className="py-3.5 px-4">Problem Statement</th>
                 <th className="py-3.5 px-4">Target Audience</th>
+                <th className="py-3.5 px-4">Revenue Model</th>
                 <th className="py-3.5 px-4">Complexity</th>
                 <th className="py-3.5 px-4">Assignment Status</th>
                 <th className="py-3.5 px-4 text-right">Actions</th>
@@ -184,13 +185,13 @@ export const AdminIdeasPage: React.FC = () => {
             <tbody className="divide-y divide-[#242424]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-foreground-muted">
+                  <td colSpan={8} className="text-center py-8 text-foreground-muted">
                     Loading startup ideas...
                   </td>
                 </tr>
               ) : ideas.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-foreground-muted">
+                  <td colSpan={8} className="text-center py-8 text-foreground-muted">
                     No startup ideas found. Click "Add Startup Idea" to create one.
                   </td>
                 </tr>
@@ -205,11 +206,14 @@ export const AdminIdeasPage: React.FC = () => {
                       <td className="py-3.5 px-4 text-foreground-muted font-mono text-xs">
                         {idea.industry}
                       </td>
-                      <td className="py-3.5 px-4 text-foreground-muted max-w-xs truncate">
+                      <td className="py-3.5 px-4 text-foreground-muted max-w-xs truncate" title={idea.problemStatement}>
                         {idea.problemStatement}
                       </td>
-                      <td className="py-3.5 px-4 text-foreground-muted max-w-xs truncate">
+                      <td className="py-3.5 px-4 text-foreground-muted max-w-xs truncate" title={idea.targetAudience}>
                         {idea.targetAudience}
+                      </td>
+                      <td className="py-3.5 px-4 text-primary text-xs max-w-xs truncate" title={idea.revenueModel}>
+                        {idea.revenueModel || '—'}
                       </td>
                       <td className="py-3.5 px-4 text-xs capitalize text-foreground">
                         {idea.complexityLevel || 'intermediate'}
