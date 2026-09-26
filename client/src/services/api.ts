@@ -246,6 +246,15 @@ export const adminService = {
   getSubmissions: async (params?: Record<string, unknown>) => {
     return apiClient.get('/admin/submissions', { params });
   },
+  adminAddMember: async (teamId: string, member: { name: string; registerNumber: string; gender: string; section: string }) => {
+    return apiClient.post(`/admin/teams/${teamId}/members`, member);
+  },
+  adminRemoveMember: async (teamId: string, memberId: string) => {
+    return apiClient.delete(`/admin/teams/${teamId}/members/${memberId}`);
+  },
+  adminRemoveTeamLead: async (teamId: string) => {
+    return apiClient.delete(`/admin/teams/${teamId}/lead`);
+  },
 };
 
 export default apiClient;

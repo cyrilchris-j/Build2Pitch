@@ -613,3 +613,109 @@ exports.getSubmissions = async (req, res) => {
     return errorResponse(res, 'Failed to fetch submissions list', 500, err);
   }
 };
+
+// ─── Admin: Add member to a team ─────────────────────────────────────────────
+exports.adminAddMember = async (req, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const { id: teamId } = req.params;
+    const { name, registerNumber, gender, section } = req.body;
+
+    if (!name || !registerNumber || !gender || !section) {
+      return errorResponse(res, 'Name, register number, gender and section are required', 400);
+    }
+
+    const team = await Team.findById(teamId);
+    if (!team) return errorResponse(res, 'Team not found', 404);
+
+    if ((team.members || []).length >= 6) {
+      return errorResponse(res, 'Team already has 6 members (maximum)', 409);
+    }
+
+    const existing = await User.findOne({ registerNumber: registerNumber.trim() });
+    if (existing) return errorResponse(res, `Register number ${registerNumber} is already registered`, 409);
+
+    const regInTeam = (team.members || []).some(
+      (m) => m.registerNumber && m.registerNumber.trim() === registerNumber.trim()
+    );
+    if (regInTeam) return errorResponse(res, 'Register number already in this team', 409);
+
+    const internalEmail = `${registerNumber.trim().toLowerCase().replace(/\s+/g, '')}@build2pitch.internal`;
+    const randomPass = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    const passwordHash = await bcrypt.hash(randomPass, 10);
+
+    const newUser = new User({
+      name: name.trim(), registerNumber: registerNumber.trim(),
+      email: internalEmail, mobile: null,
+      gender: gender.toUpperCase(), section: section.trim(),
+      passwordHash, role: 'TEAM_MEMBER', teamId: team._id, isActive: true,
+    });
+    await newUser.save();
+
+    team.members.push({
+      name: newUser.name, email: newUser.email, role: 'developer',
+      userId: newUser._id, registerNumber: newUser.registerNumber,
+      gender: newUser.gender, section: newUser.section, joinedAt: new Date(),
+    });
+    await team.save();
+
+    return successResponse(res, {
+      id: newUser._id.toString(), name: newUser.name,
+      registerNumber: newUser.registerNumber, gender: newUser.gender,
+      section: newUser.section, role: 'developer', totalMembers: team.members.length,
+    }, 'Member added by admin', 201);
+  } catch (error) {
+    if (error.code === 11000) return errorResponse(res, 'Duplicate: register number already exists', 409);
+    return errorResponse(res, error.message || 'Server error adding member', 500);
+  }
+};
+
+// ─── Admin: Remove a member from a team ──────────────────────────────────────
+exports.adminRemoveMember = async (req, res) => {
+  try {
+    const { id: teamId, memberId } = req.params;
+    const team = await Team.findById(teamId);
+    if (!team) return errorResponse(res, 'Team not found', 404);
+
+    const memberIndex = team.members.findIndex(
+      (m) => m._id?.toString() === memberId || m.userId?.toString() === memberId
+    );
+    if (memberIndex === -1) return errorResponse(res, 'Member not found in team', 404);
+
+    const removed = team.members[memberIndex];
+    if (removed.role === 'leader') {
+      return errorResponse(res, 'Use DELETE /lead to remove the team lead', 400);
+    }
+
+    team.members.splice(memberIndex, 1);
+    await team.save();
+    if (removed.userId) await User.findByIdAndUpdate(removed.userId, { isActive: false, teamId: null });
+
+    return successResponse(res, { memberId, removed: true }, 'Member removed by admin');
+  } catch (error) {
+    return errorResponse(res, error.message || 'Server error', 500);
+  }
+};
+
+// ─── Admin: Remove the Team Lead ─────────────────────────────────────────────
+exports.adminRemoveTeamLead = async (req, res) => {
+  try {
+    const { id: teamId } = req.params;
+    const team = await Team.findById(teamId);
+    if (!team) return errorResponse(res, 'Team not found', 404);
+
+    const leadIndex = team.members.findIndex((m) => m.role === 'leader');
+    if (leadIndex !== -1) {
+      const leadEntry = team.members[leadIndex];
+      team.members.splice(leadIndex, 1);
+      if (leadEntry.userId) await User.findByIdAndUpdate(leadEntry.userId, { isActive: false, teamId: null });
+    }
+    if (team.leaderId) await User.findByIdAndUpdate(team.leaderId, { isActive: false, teamId: null });
+    team.leaderId = null;
+    await team.save();
+
+    return successResponse(res, { teamId, leadRemoved: true }, 'Team lead removed by admin');
+  } catch (error) {
+    return errorResponse(res, error.message || 'Server error', 500);
+  }
+};
