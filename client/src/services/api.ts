@@ -160,11 +160,8 @@ export const teamService = {
   addMember: async (member: {
     name: string;
     registerNumber: string;
-    email: string;
-    mobile: string;
     gender: string;
     section: string;
-    password: string;
   }) => {
     return apiClient.post('/teams/me/members', member);
   },

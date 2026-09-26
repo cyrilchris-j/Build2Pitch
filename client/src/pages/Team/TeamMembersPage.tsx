@@ -3,14 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users,
   UserPlus,
-  Mail,
   Hash,
-  Phone,
   User,
   Layers,
-  Lock,
-  Eye,
-  EyeOff,
   CheckCircle2,
   AlertCircle,
   X,
@@ -22,6 +17,7 @@ import {
   Megaphone,
   Target,
   Globe,
+  Info,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { teamService } from '@/services/api';
@@ -30,11 +26,10 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 
-
 const GENDER_OPTIONS = [
   { value: 'MALE', label: 'Male' },
   { value: 'FEMALE', label: 'Female' },
-  { value: 'OTHER', label: 'Other' },
+  { value: 'OTHER', label: 'Other / Prefer not to say' },
 ];
 
 const MemberRoleIcon: Record<string, React.ElementType> = {
@@ -61,7 +56,14 @@ const MemberCard: React.FC<{
     researcher: 'warning',
     marketer: 'danger',
   };
-  const color = (roleColors[member.role] || 'default') as 'primary' | 'accent' | 'purple' | 'success' | 'warning' | 'danger' | 'default';
+  const color = (roleColors[member.role] || 'default') as
+    | 'primary'
+    | 'accent'
+    | 'purple'
+    | 'success'
+    | 'warning'
+    | 'danger'
+    | 'default';
 
   return (
     <motion.div
@@ -77,13 +79,13 @@ const MemberCard: React.FC<{
             <Icon className={`h-5 w-5 text-${color}`} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <p className="text-sm font-bold text-foreground">{member.name}</p>
-              {isLead && (
-                <Badge variant="primary" className="text-[10px]">LEAD</Badge>
-              )}
+              {isLead && <Badge variant="primary" className="text-[10px]">LEAD</Badge>}
             </div>
-            <p className="text-xs text-foreground-muted mt-0.5">{member.email}</p>
+            <p className="text-xs text-foreground-subtle mt-0.5 font-mono">
+              {member.registerNumber || '—'}
+            </p>
           </div>
         </div>
         {canRemove && onRemove && (
@@ -96,18 +98,11 @@ const MemberCard: React.FC<{
         )}
       </div>
 
+      {/* Details row */}
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-foreground-muted">
         <div className="flex items-center gap-1.5">
-          <Hash className="h-3 w-3 shrink-0" />
-          <span className="truncate">{member.registerNumber || '—'}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Phone className="h-3 w-3 shrink-0" />
-          <span className="truncate">{member.mobile || '—'}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
           <User className="h-3 w-3 shrink-0" />
-          <span>{member.gender || '—'}</span>
+          <span className="capitalize">{member.gender?.toLowerCase() || '—'}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <Layers className="h-3 w-3 shrink-0" />
@@ -115,7 +110,7 @@ const MemberCard: React.FC<{
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-3">
         <Badge variant={color}>{member.role}</Badge>
       </div>
     </motion.div>
@@ -125,12 +120,8 @@ const MemberCard: React.FC<{
 const emptyForm = {
   name: '',
   registerNumber: '',
-  email: '',
-  mobile: '',
   gender: 'MALE',
   section: '',
-  password: '',
-  confirmPassword: '',
 };
 
 export const TeamMembersPage: React.FC = () => {
@@ -140,7 +131,6 @@ export const TeamMembersPage: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
-  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -159,9 +149,7 @@ export const TeamMembersPage: React.FC = () => {
     try {
       const res = await teamService.getMembers();
       const data = res.data?.data;
-      if (Array.isArray(data)) {
-        setMembers(data);
-      }
+      if (Array.isArray(data)) setMembers(data);
     } catch (err: any) {
       setErrorMessage(err?.message || 'Failed to load team members');
     } finally {
@@ -179,17 +167,9 @@ export const TeamMembersPage: React.FC = () => {
     e.preventDefault();
     setErrorMessage(null);
 
-    const { name, registerNumber, email, mobile, gender, section, password, confirmPassword } = formData;
-    if (!name || !registerNumber || !email || !mobile || !gender || !section || !password) {
-      setErrorMessage('All fields are required.');
-      return;
-    }
-    if (password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.');
+    const { name, registerNumber, gender, section } = formData;
+    if (!name.trim() || !registerNumber.trim() || !gender || !section.trim()) {
+      setErrorMessage('All 4 fields are required.');
       return;
     }
 
@@ -198,23 +178,20 @@ export const TeamMembersPage: React.FC = () => {
       const res = await teamService.addMember({
         name: name.trim(),
         registerNumber: registerNumber.trim(),
-        email: email.trim().toLowerCase(),
-        mobile: mobile.trim(),
         gender,
         section: section.trim(),
-        password,
       });
 
       const newMember = res.data?.data;
       if (newMember) {
         setMembers((prev) => [...prev, newMember as TeamMember]);
-        setSuccessMessage(`${name.trim()} has been added to your team!`);
+        setSuccessMessage(`${name.trim()} added to your team!`);
         setFormData(emptyForm);
         setShowForm(false);
         setTimeout(() => setSuccessMessage(null), 4000);
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to add member');
+      setErrorMessage(err?.response?.data?.message || err?.message || 'Failed to add member');
     } finally {
       setIsAdding(false);
     }
@@ -232,6 +209,10 @@ export const TeamMembersPage: React.FC = () => {
     }
   };
 
+  const inputCls =
+    'w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder-foreground-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors';
+  const labelCls = 'block text-xs font-semibold text-foreground-muted mb-1.5 uppercase tracking-wide';
+
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       {/* Header */}
@@ -243,7 +224,7 @@ export const TeamMembersPage: React.FC = () => {
           <div>
             <h1 className="text-xl font-black text-foreground tracking-tight">Team Members</h1>
             <p className="text-xs text-foreground-muted">
-              {memberCount}/{MAX_TEAM_SIZE} members registered (Team size: 2 to 6 members allowed)
+              {memberCount}/{MAX_TEAM_SIZE} members registered · 2 to 6 members allowed
             </p>
           </div>
         </div>
@@ -255,25 +236,32 @@ export const TeamMembersPage: React.FC = () => {
         />
       </div>
 
-      {/* Team Size Status Banner */}
+      {/* Info notice */}
+      <div className="mb-5 p-3.5 rounded-xl border border-border bg-background-subtle flex items-start gap-2.5">
+        <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+        <p className="text-xs text-foreground-muted leading-relaxed">
+          <span className="font-semibold text-foreground">No gender restrictions</span> — Teams can have 2 to 6 members (including Team Lead).
+          Members are registered with their <span className="font-semibold">name, register number, gender, and section</span> only.
+        </p>
+      </div>
+
+      {/* Status banners */}
       {memberCount < MIN_TEAM_SIZE && (
         <div className="mb-4 p-3 rounded-xl border border-warning/30 bg-warning/5 flex items-center gap-2 text-warning text-sm">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>
-            Team size rule: Teams can have 2 to 6 members (including Team Lead). Please add at least {MIN_TEAM_SIZE - memberCount} more member{MIN_TEAM_SIZE - memberCount > 1 ? 's' : ''} to meet the minimum requirement.
+            Add at least {MIN_TEAM_SIZE - memberCount} more member{MIN_TEAM_SIZE - memberCount > 1 ? 's' : ''} to meet the minimum of 2.
           </span>
         </div>
       )}
       {memberCount >= MIN_TEAM_SIZE && (
         <div className="mb-4 p-3 rounded-xl border border-success/30 bg-success/5 flex items-center gap-2 text-success text-sm">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>
-            Team requirement satisfied — {memberCount}/{MAX_TEAM_SIZE} members registered (2 to 6 members allowed, no gender restrictions).
-          </span>
+          <span>Team requirement met — {memberCount}/{MAX_TEAM_SIZE} members registered.</span>
         </div>
       )}
 
-      {/* Success / Error banners */}
+      {/* Success / Error */}
       <AnimatePresence>
         {successMessage && (
           <motion.div
@@ -330,12 +318,12 @@ export const TeamMembersPage: React.FC = () => {
               key={`empty-${i}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="border border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center min-h-[140px] text-center"
+              className="border border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center min-h-[130px] text-center"
             >
               <div className="h-9 w-9 rounded-xl border border-dashed border-border flex items-center justify-center mb-2">
                 <UserPlus className="h-4 w-4 text-foreground-subtle" />
               </div>
-              <p className="text-xs text-foreground-subtle">Empty Slot</p>
+              <p className="text-xs text-foreground-subtle">Open Slot</p>
             </motion.div>
           ))}
         </div>
@@ -355,11 +343,11 @@ export const TeamMembersPage: React.FC = () => {
       {memberCount >= MAX_TEAM_SIZE && (
         <div className="flex items-center justify-center gap-2 py-4 px-5 rounded-xl border border-success/30 bg-success/5 text-success text-sm font-semibold">
           <CheckCircle2 className="h-5 w-5" />
-          Team is full! All 6 members registered.
+          Team is full — all 6 members registered!
         </div>
       )}
 
-      {/* Add Member Form */}
+      {/* ── Add Member Form ─────────────────────────────── */}
       <AnimatePresence>
         {showForm && (
           <motion.div
@@ -368,67 +356,72 @@ export const TeamMembersPage: React.FC = () => {
             exit={{ opacity: 0, y: 20 }}
             className="mt-6 bg-card border border-border rounded-2xl p-6"
           >
+            {/* Form Header */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
                 <UserPlus className="h-5 w-5 text-primary" />
-                <h2 className="text-base font-bold text-foreground">Add New Member</h2>
+                <div>
+                  <h2 className="text-base font-bold text-foreground">Add New Member</h2>
+                  <p className="text-xs text-foreground-muted mt-0.5">
+                    Only 4 fields required — no login credentials needed
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => { setShowForm(false); setErrorMessage(null); setFormData(emptyForm); }}
-                className="text-foreground-subtle hover:text-foreground p-1 rounded-lg hover:bg-card-hover transition-colors"
+                className="text-foreground-subtle hover:text-foreground p-1.5 rounded-lg hover:bg-card-hover transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Personal Details */}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
                 {/* Name */}
                 <div>
-                  <label className="block text-xs font-medium text-foreground-muted mb-1.5">Full Name *</label>
+                  <label className={labelCls}>Full Name *</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
-                    <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Riya Sharma" required
-                      className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder-foreground-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" />
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="e.g. Riya Sharma"
+                      required
+                      className={inputCls}
+                    />
                   </div>
                 </div>
 
                 {/* Register Number */}
                 <div>
-                  <label className="block text-xs font-medium text-foreground-muted mb-1.5">Register Number *</label>
+                  <label className={labelCls}>Register Number *</label>
                   <div className="relative">
                     <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
-                    <input type="text" name="registerNumber" value={formData.registerNumber} onChange={handleChange} placeholder="e.g. 21CS043" required
-                      className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder-foreground-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" />
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-xs font-medium text-foreground-muted mb-1.5">Email *</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="member@college.edu" required
-                      className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder-foreground-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" />
-                  </div>
-                </div>
-
-                {/* Mobile */}
-                <div>
-                  <label className="block text-xs font-medium text-foreground-muted mb-1.5">Mobile *</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
-                    <input type="tel" name="mobile" value={formData.mobile} onChange={handleChange} placeholder="9876543210" required
-                      className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder-foreground-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" />
+                    <input
+                      type="text"
+                      name="registerNumber"
+                      value={formData.registerNumber}
+                      onChange={handleChange}
+                      placeholder="e.g. 21CS043"
+                      required
+                      className={inputCls}
+                    />
                   </div>
                 </div>
 
                 {/* Gender */}
                 <div>
-                  <label className="block text-xs font-medium text-foreground-muted mb-1.5">Gender *</label>
-                  <select name="gender" value={formData.gender} onChange={handleChange} required
-                    className="w-full px-3 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors">
+                  <label className={labelCls}>Gender *</label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
+                  >
                     {GENDER_OPTIONS.map(({ value, label }) => (
                       <option key={value} value={value}>{label}</option>
                     ))}
@@ -437,50 +430,32 @@ export const TeamMembersPage: React.FC = () => {
 
                 {/* Section */}
                 <div>
-                  <label className="block text-xs font-medium text-foreground-muted mb-1.5">Section / Dept *</label>
+                  <label className={labelCls}>Section / Dept *</label>
                   <div className="relative">
                     <Layers className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
-                    <input type="text" name="section" value={formData.section} onChange={handleChange} placeholder="e.g. CSE-A" required
-                      className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder-foreground-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" />
+                    <input
+                      type="text"
+                      name="section"
+                      value={formData.section}
+                      onChange={handleChange}
+                      placeholder="e.g. CSE-A or IT"
+                      required
+                      className={inputCls}
+                    />
                   </div>
                 </div>
               </div>
-
-              {/* Password */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-foreground-muted mb-1.5">Login Password *</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
-                    <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} placeholder="Min 6 characters" required
-                      className="w-full pl-9 pr-10 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder-foreground-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-subtle hover:text-foreground">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-foreground-muted mb-1.5">Confirm Password *</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
-                    <input type={showPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Repeat password" required
-                      className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder-foreground-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Hint */}
-              <p className="text-xs text-foreground-subtle">
-                The member will use their email + password to login at <strong className="text-foreground-muted">/member-login</strong>
-              </p>
 
               {/* Actions */}
               <div className="flex gap-3 pt-2">
                 <Button type="submit" isLoading={isAdding} leftIcon={<UserPlus className="h-4 w-4" />} className="flex-1">
                   Add Member
                 </Button>
-                <Button type="button" variant="secondary" onClick={() => { setShowForm(false); setFormData(emptyForm); }}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => { setShowForm(false); setFormData(emptyForm); }}
+                >
                   Cancel
                 </Button>
               </div>

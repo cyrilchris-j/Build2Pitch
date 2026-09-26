@@ -151,8 +151,9 @@ exports.getMembers = async (req, res) => {
 
 /**
  * POST /api/teams/me/members
- * Add a new team member — Team Lead only
- * Creates a User record with hashed password, then adds to Team.members
+ * Add a new team member — Team Lead only.
+ * Members are display-only roster entries; they do NOT get separate login credentials.
+ * Required fields: name, registerNumber, gender, section
  */
 exports.addMember = async (req, res) => {
   try {
@@ -162,17 +163,20 @@ exports.addMember = async (req, res) => {
     }
 
     const userId = req.user.id;
-    const { name, registerNumber, email, mobile, gender, section, password } = req.body;
+    const { name, registerNumber, gender, section } = req.body;
 
-    // Field validation
-    if (!name || !email || !password) {
-      return errorResponse(res, 'Name, email, and password are required', 400);
+    // Validate only the 4 required fields
+    if (!name || !name.trim()) {
+      return errorResponse(res, 'Member name is required', 400);
     }
-    if (!registerNumber || !mobile || !gender || !section) {
-      return errorResponse(res, 'Register number, mobile, gender, and section are required', 400);
+    if (!registerNumber || !registerNumber.trim()) {
+      return errorResponse(res, 'Register number is required', 400);
     }
-    if (password.length < 6) {
-      return errorResponse(res, 'Member password must be at least 6 characters', 400);
+    if (!gender) {
+      return errorResponse(res, 'Gender is required', 400);
+    }
+    if (!section || !section.trim()) {
+      return errorResponse(res, 'Section / Department is required', 400);
     }
 
     // Find team
@@ -194,37 +198,33 @@ exports.addMember = async (req, res) => {
       return errorResponse(res, 'Cannot add more than 5 team members (6 total including Team Lead)', 409);
     }
 
-    // Check for duplicate email in User collection
-    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
-    if (existingUser) {
-      return errorResponse(res, `Email ${email} is already registered`, 409);
+    // Check for duplicate registerNumber in User collection
+    const existingReg = await User.findOne({ registerNumber: registerNumber.trim() });
+    if (existingReg) {
+      return errorResponse(res, `Register number ${registerNumber} is already registered`, 409);
     }
 
-    // Check for duplicate registerNumber
-    if (registerNumber) {
-      const existingReg = await User.findOne({ registerNumber: registerNumber.trim() });
-      if (existingReg) {
-        return errorResponse(res, `Register number ${registerNumber} is already registered`, 409);
-      }
-    }
-
-    // Check for duplicate email within team
-    const emailInTeam = team.members.some(
-      (m) => m.email.toLowerCase() === email.toLowerCase().trim()
+    // Check duplicate registerNumber within this team
+    const regInTeam = team.members.some(
+      (m) => m.registerNumber && m.registerNumber.trim() === registerNumber.trim()
     );
-    if (emailInTeam) {
-      return errorResponse(res, 'This email is already in your team', 409);
+    if (regInTeam) {
+      return errorResponse(res, 'This register number is already in your team', 409);
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
+    // Auto-generate an internal email (not used for login)
+    const internalEmail = `${registerNumber.trim().toLowerCase().replace(/\s+/g, '')}@build2pitch.internal`;
+
+    // Auto-generate a random password hash (member has no login access)
+    const randomPass = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    const passwordHash = await bcrypt.hash(randomPass, 10);
 
     // Create the member User record
     const newUser = new User({
       name: name.trim(),
       registerNumber: registerNumber.trim(),
-      email: email.toLowerCase().trim(),
-      mobile: mobile.trim(),
+      email: internalEmail,
+      mobile: null,
       gender: gender.toUpperCase(),
       section: section.trim(),
       passwordHash,
@@ -241,7 +241,7 @@ exports.addMember = async (req, res) => {
       role: 'developer',
       userId: newUser._id,
       registerNumber: newUser.registerNumber,
-      mobileNumber: newUser.mobile,
+      mobileNumber: null,
       gender: newUser.gender,
       section: newUser.section,
       joinedAt: new Date(),
@@ -255,7 +255,7 @@ exports.addMember = async (req, res) => {
         userId: req.user.id,
         teamId: team._id,
         action: 'MEMBER_ADDED',
-        metadata: { memberEmail: newUser.email, memberName: newUser.name },
+        metadata: { memberRegNo: newUser.registerNumber, memberName: newUser.name },
       });
     } catch (_) { /* non-critical */ }
 
@@ -265,9 +265,7 @@ exports.addMember = async (req, res) => {
         id: newUser._id.toString(),
         userId: newUser._id.toString(),
         name: newUser.name,
-        email: newUser.email,
         registerNumber: newUser.registerNumber,
-        mobile: newUser.mobile,
         gender: newUser.gender,
         section: newUser.section,
         role: 'developer',
