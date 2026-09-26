@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -10,6 +10,7 @@ import {
   BarChart3,
   Menu,
   X,
+  LogOut,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuth } from '@/context/AuthContext';
@@ -23,8 +24,14 @@ const navItems = [
 ];
 
 export const AdminLayout: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/admin/login');
+  };
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
@@ -100,14 +107,23 @@ export const AdminLayout: React.FC = () => {
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-4 border-t border-border">
+        <div className="px-4 py-4 border-t border-border space-y-3">
           <div className="px-3 py-2.5 rounded-xl bg-purple/5 border border-purple/10">
             <p className="text-[10px] text-foreground-subtle uppercase tracking-wider font-semibold mb-1">
               Platform
             </p>
             <p className="text-xs font-bold text-purple-light">Build2Pitch 2026</p>
-            <p className="text-[10px] text-foreground-subtle">Build2Pitch Event Platform</p>
+            <p className="text-[10px] text-foreground-subtle">Admin Command Center</p>
           </div>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-foreground-muted hover:text-danger hover:bg-danger/10 border border-transparent hover:border-danger/20 transition-all"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </button>
         </div>
       </aside>
 
