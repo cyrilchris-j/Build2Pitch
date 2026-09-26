@@ -198,22 +198,9 @@ exports.addMember = async (req, res) => {
       return errorResponse(res, 'Cannot add more than 5 team members (6 total including Team Lead)', 409);
     }
 
-    // Check for duplicate registerNumber in User collection
-    const existingReg = await User.findOne({ registerNumber: registerNumber.trim() });
-    if (existingReg) {
-      return errorResponse(res, `Register number ${registerNumber} is already registered`, 409);
-    }
-
-    // Check duplicate registerNumber within this team
-    const regInTeam = team.members.some(
-      (m) => m.registerNumber && m.registerNumber.trim() === registerNumber.trim()
-    );
-    if (regInTeam) {
-      return errorResponse(res, 'This register number is already in your team', 409);
-    }
-
-    // Auto-generate an internal email (not used for login)
-    const internalEmail = `${registerNumber.trim().toLowerCase().replace(/\s+/g, '')}@build2pitch.internal`;
+    // Auto-generate a guaranteed unique internal email (members do not log in)
+    const cleanReg = (registerNumber.trim().toLowerCase().replace(/[^a-z0-9]/g, '')) || 'member';
+    const internalEmail = `${cleanReg}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}@build2pitch.internal`;
 
     // Auto-generate a random password hash (member has no login access)
     const randomPass = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);

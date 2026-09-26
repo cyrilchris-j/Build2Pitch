@@ -246,11 +246,20 @@ export const adminService = {
   getSubmissions: async (params?: Record<string, unknown>) => {
     return apiClient.get('/admin/submissions', { params });
   },
-  adminAddMember: async (teamId: string, member: { name: string; registerNumber: string; gender: string; section: string }) => {
+  adminAddMember: async (teamId: string, member: { name: string; registerNumber: string; gender: string; section: string; role?: string }) => {
     return apiClient.post(`/admin/teams/${teamId}/members`, member);
+  },
+  adminUpdateMember: async (teamId: string, memberId: string, member: { name?: string; registerNumber?: string; gender?: string; section?: string; role?: string }) => {
+    return apiClient.put(`/admin/teams/${teamId}/members/${memberId}`, member);
   },
   adminRemoveMember: async (teamId: string, memberId: string) => {
     return apiClient.delete(`/admin/teams/${teamId}/members/${memberId}`);
+  },
+  adminAddTeamLead: async (teamId: string, lead: { name: string; registerNumber: string; gender: string; section: string; email?: string; mobile?: string }) => {
+    return apiClient.post(`/admin/teams/${teamId}/lead`, lead);
+  },
+  adminUpdateTeamLead: async (teamId: string, lead: { name?: string; registerNumber?: string; gender?: string; section?: string; email?: string; mobile?: string }) => {
+    return apiClient.put(`/admin/teams/${teamId}/lead`, lead);
   },
   adminRemoveTeamLead: async (teamId: string) => {
     return apiClient.delete(`/admin/teams/${teamId}/lead`);

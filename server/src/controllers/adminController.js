@@ -202,20 +202,45 @@ exports.getTeams = async (req, res) => {
       }
 
       const dbTeams = await Team.find(query)
-        .populate('leaderId', 'name email registerNumber mobileNumber gender section')
+        .populate('leaderId', 'name email registerNumber mobile gender section role')
         .lean();
 
       teamList = await Promise.all(
         dbTeams.map(async (t) => {
           const sub = await Submission.findOne({ teamId: t._id }).lean();
+          const leadMember = (t.members || []).find((m) => m.role === 'leader');
+          const leaderData = t.leaderId || (leadMember ? {
+            id: leadMember._id?.toString() || leadMember.userId?.toString(),
+            name: leadMember.name,
+            email: leadMember.email,
+            registerNumber: leadMember.registerNumber,
+            gender: leadMember.gender,
+            section: leadMember.section,
+            mobile: leadMember.mobileNumber,
+          } : null);
+
+          const membersList = (t.members || []).map((m) => ({
+            id: m._id ? m._id.toString() : (m.userId ? m.userId.toString() : ''),
+            _id: m._id ? m._id.toString() : (m.userId ? m.userId.toString() : ''),
+            userId: m.userId ? m.userId.toString() : null,
+            name: m.name,
+            email: m.email,
+            role: m.role || 'developer',
+            registerNumber: m.registerNumber || '',
+            gender: m.gender || '',
+            section: m.section || '',
+            mobileNumber: m.mobileNumber || '',
+            joinedAt: m.joinedAt,
+          }));
+
           return {
             id: t._id.toString(),
             teamNumber: t.teamNumber,
             name: t.name,
             teamCode: t.teamCode,
-            leaderId: t.leaderId?._id?.toString() || t.leaderId,
-            leader: t.leaderId || { name: 'N/A' },
-            members: t.members || [],
+            leaderId: t.leaderId?._id?.toString() || (typeof t.leaderId === 'string' ? t.leaderId : (leadMember?.userId?.toString() || null)),
+            leader: leaderData,
+            members: membersList,
             ideaAssignment: t.ideaAssignment,
             isLocked: t.isLocked,
             tableNumber: t.tableNumber || 'Unassigned',
@@ -619,7 +644,7 @@ exports.adminAddMember = async (req, res) => {
   try {
     const bcrypt = require('bcryptjs');
     const { id: teamId } = req.params;
-    const { name, registerNumber, gender, section } = req.body;
+    const { name, registerNumber, gender, section, role } = req.body;
 
     if (!name || !registerNumber || !gender || !section) {
       return errorResponse(res, 'Name, register number, gender and section are required', 400);
@@ -632,41 +657,103 @@ exports.adminAddMember = async (req, res) => {
       return errorResponse(res, 'Team already has 6 members (maximum)', 409);
     }
 
-    const existing = await User.findOne({ registerNumber: registerNumber.trim() });
-    if (existing) return errorResponse(res, `Register number ${registerNumber} is already registered`, 409);
-
-    const regInTeam = (team.members || []).some(
-      (m) => m.registerNumber && m.registerNumber.trim() === registerNumber.trim()
-    );
-    if (regInTeam) return errorResponse(res, 'Register number already in this team', 409);
-
-    const internalEmail = `${registerNumber.trim().toLowerCase().replace(/\s+/g, '')}@build2pitch.internal`;
+    // Duplicate register numbers are allowed — generate unique internal email for User collection
+    const cleanReg = (registerNumber.trim().toLowerCase().replace(/[^a-z0-9]/g, '')) || 'member';
+    const internalEmail = `${cleanReg}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}@build2pitch.internal`;
     const randomPass = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
     const passwordHash = await bcrypt.hash(randomPass, 10);
 
     const newUser = new User({
-      name: name.trim(), registerNumber: registerNumber.trim(),
-      email: internalEmail, mobile: null,
-      gender: gender.toUpperCase(), section: section.trim(),
-      passwordHash, role: 'TEAM_MEMBER', teamId: team._id, isActive: true,
+      name: name.trim(),
+      registerNumber: registerNumber.trim(),
+      email: internalEmail,
+      mobile: null,
+      gender: gender.toUpperCase(),
+      section: section.trim(),
+      passwordHash,
+      role: 'TEAM_MEMBER',
+      teamId: team._id,
+      isActive: true,
     });
     await newUser.save();
 
-    team.members.push({
-      name: newUser.name, email: newUser.email, role: 'developer',
-      userId: newUser._id, registerNumber: newUser.registerNumber,
-      gender: newUser.gender, section: newUser.section, joinedAt: new Date(),
-    });
+    const memberRole = role ? role.trim().toLowerCase() : 'developer';
+    const memberEntry = {
+      name: newUser.name,
+      email: newUser.email,
+      role: memberRole,
+      userId: newUser._id,
+      registerNumber: newUser.registerNumber,
+      gender: newUser.gender,
+      section: newUser.section,
+      joinedAt: new Date(),
+    };
+    team.members.push(memberEntry);
+    await team.save();
+
+    const createdMember = team.members[team.members.length - 1];
+
+    return successResponse(res, {
+      id: createdMember._id?.toString() || newUser._id.toString(),
+      _id: createdMember._id?.toString() || newUser._id.toString(),
+      userId: newUser._id.toString(),
+      name: newUser.name,
+      registerNumber: newUser.registerNumber,
+      gender: newUser.gender,
+      section: newUser.section,
+      role: memberRole,
+      totalMembers: team.members.length,
+    }, 'Member added by admin', 201);
+  } catch (error) {
+    return errorResponse(res, error.message || 'Server error adding member', 500);
+  }
+};
+
+// ─── Admin: Update / Change Member Details ──────────────────────────────────
+exports.adminUpdateMember = async (req, res) => {
+  try {
+    const { id: teamId, memberId } = req.params;
+    const { name, registerNumber, gender, section, role } = req.body;
+
+    const team = await Team.findById(teamId);
+    if (!team) return errorResponse(res, 'Team not found', 404);
+
+    const member = (team.members || []).find(
+      (m) => m._id?.toString() === memberId || m.userId?.toString() === memberId || m.id?.toString() === memberId
+    );
+    if (!member) return errorResponse(res, 'Member not found in team', 404);
+
+    if (name && name.trim()) member.name = name.trim();
+    if (registerNumber !== undefined) member.registerNumber = registerNumber.trim();
+    if (gender) member.gender = gender.toUpperCase();
+    if (section !== undefined) member.section = section.trim();
+    if (role) member.role = role.trim().toLowerCase();
+
+    // If member has linked User document, update it too
+    if (member.userId) {
+      const userUpdate = {};
+      if (name && name.trim()) userUpdate.name = name.trim();
+      if (registerNumber !== undefined) userUpdate.registerNumber = registerNumber.trim();
+      if (gender) userUpdate.gender = gender.toUpperCase();
+      if (section !== undefined) userUpdate.section = section.trim();
+      await User.findByIdAndUpdate(member.userId, userUpdate);
+    }
+
+    team.markModified('members');
     await team.save();
 
     return successResponse(res, {
-      id: newUser._id.toString(), name: newUser.name,
-      registerNumber: newUser.registerNumber, gender: newUser.gender,
-      section: newUser.section, role: 'developer', totalMembers: team.members.length,
-    }, 'Member added by admin', 201);
+      id: member._id?.toString() || member.userId?.toString() || memberId,
+      _id: member._id?.toString() || member.userId?.toString() || memberId,
+      userId: member.userId ? member.userId.toString() : null,
+      name: member.name,
+      registerNumber: member.registerNumber,
+      gender: member.gender,
+      section: member.section,
+      role: member.role,
+    }, 'Member details updated successfully');
   } catch (error) {
-    if (error.code === 11000) return errorResponse(res, 'Duplicate: register number already exists', 409);
-    return errorResponse(res, error.message || 'Server error adding member', 500);
+    return errorResponse(res, error.message || 'Server error updating member', 500);
   }
 };
 
@@ -678,7 +765,7 @@ exports.adminRemoveMember = async (req, res) => {
     if (!team) return errorResponse(res, 'Team not found', 404);
 
     const memberIndex = team.members.findIndex(
-      (m) => m._id?.toString() === memberId || m.userId?.toString() === memberId
+      (m) => m._id?.toString() === memberId || m.userId?.toString() === memberId || m.id?.toString() === memberId
     );
     if (memberIndex === -1) return errorResponse(res, 'Member not found in team', 404);
 
@@ -694,6 +781,158 @@ exports.adminRemoveMember = async (req, res) => {
     return successResponse(res, { memberId, removed: true }, 'Member removed by admin');
   } catch (error) {
     return errorResponse(res, error.message || 'Server error', 500);
+  }
+};
+
+// ─── Admin: Add / Assign Team Lead ──────────────────────────────────────────
+exports.adminAddTeamLead = async (req, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const { id: teamId } = req.params;
+    const { name, registerNumber, gender, section, email, mobile } = req.body;
+
+    if (!name || !registerNumber || !gender || !section) {
+      return errorResponse(res, 'Name, register number, gender, and section are required', 400);
+    }
+
+    const team = await Team.findById(teamId);
+    if (!team) return errorResponse(res, 'Team not found', 404);
+
+    const cleanReg = (registerNumber.trim().toLowerCase().replace(/[^a-z0-9]/g, '')) || 'lead';
+    let leadEmail = email && email.trim() ? email.trim().toLowerCase() : null;
+    if (leadEmail) {
+      const existingUser = await User.findOne({ email: leadEmail });
+      if (existingUser) {
+        leadEmail = `${cleanReg}_lead_${Date.now()}_${Math.random().toString(36).substring(2, 6)}@build2pitch.internal`;
+      }
+    } else {
+      leadEmail = `${cleanReg}_lead_${Date.now()}_${Math.random().toString(36).substring(2, 6)}@build2pitch.internal`;
+    }
+
+    const randomPass = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    const passwordHash = await bcrypt.hash(randomPass, 10);
+
+    const newLead = new User({
+      name: name.trim(),
+      registerNumber: registerNumber.trim(),
+      email: leadEmail,
+      mobile: mobile ? mobile.trim() : null,
+      gender: gender.toUpperCase(),
+      section: section.trim(),
+      passwordHash,
+      role: 'TEAM_LEAD',
+      teamId: team._id,
+      isActive: true,
+    });
+    await newLead.save();
+
+    team.leaderId = newLead._id;
+    team.members = (team.members || []).filter((m) => m.role !== 'leader');
+    team.members.unshift({
+      name: newLead.name,
+      email: newLead.email,
+      role: 'leader',
+      userId: newLead._id,
+      registerNumber: newLead.registerNumber,
+      mobileNumber: newLead.mobile || '',
+      gender: newLead.gender,
+      section: newLead.section,
+      joinedAt: new Date(),
+    });
+
+    await team.save();
+
+    return successResponse(res, {
+      leaderId: newLead._id.toString(),
+      leader: {
+        id: newLead._id.toString(),
+        name: newLead.name,
+        email: newLead.email,
+        registerNumber: newLead.registerNumber,
+        gender: newLead.gender,
+        section: newLead.section,
+        mobile: newLead.mobile,
+      },
+      members: team.members,
+    }, 'Team Lead added successfully', 201);
+  } catch (error) {
+    return errorResponse(res, error.message || 'Server error adding team lead', 500);
+  }
+};
+
+// ─── Admin: Update / Change Team Lead Details ────────────────────────────────
+exports.adminUpdateTeamLead = async (req, res) => {
+  try {
+    const { id: teamId } = req.params;
+    const { name, registerNumber, gender, section, email, mobile } = req.body;
+
+    const team = await Team.findById(teamId);
+    if (!team) return errorResponse(res, 'Team not found', 404);
+
+    const updateData = {};
+    if (name && name.trim()) updateData.name = name.trim();
+    if (registerNumber !== undefined) updateData.registerNumber = registerNumber.trim();
+    if (gender) updateData.gender = gender.toUpperCase();
+    if (section !== undefined) updateData.section = section.trim();
+    if (mobile !== undefined) updateData.mobile = mobile ? mobile.trim() : null;
+
+    if (email && email.trim()) {
+      const cleanEmail = email.trim().toLowerCase();
+      if (team.leaderId) {
+        const existingEmail = await User.findOne({ email: cleanEmail, _id: { $ne: team.leaderId } });
+        if (existingEmail) {
+          return errorResponse(res, 'Email address is already in use by another account', 409);
+        }
+      }
+      updateData.email = cleanEmail;
+    }
+
+    let updatedLeadUser = null;
+    if (team.leaderId) {
+      updatedLeadUser = await User.findByIdAndUpdate(team.leaderId, updateData, { new: true });
+    }
+
+    let leadMember = (team.members || []).find(
+      (m) => m.role === 'leader' || (team.leaderId && m.userId?.toString() === team.leaderId.toString())
+    );
+    if (leadMember) {
+      if (name && name.trim()) leadMember.name = name.trim();
+      if (registerNumber !== undefined) leadMember.registerNumber = registerNumber.trim();
+      if (gender) leadMember.gender = gender.toUpperCase();
+      if (section !== undefined) leadMember.section = section.trim();
+      if (email && email.trim()) leadMember.email = email.trim().toLowerCase();
+      if (mobile !== undefined) leadMember.mobileNumber = mobile ? mobile.trim() : '';
+    } else if (updatedLeadUser) {
+      team.members.unshift({
+        name: updatedLeadUser.name,
+        email: updatedLeadUser.email,
+        role: 'leader',
+        userId: updatedLeadUser._id,
+        registerNumber: updatedLeadUser.registerNumber,
+        mobileNumber: updatedLeadUser.mobile || '',
+        gender: updatedLeadUser.gender,
+        section: updatedLeadUser.section,
+        joinedAt: new Date(),
+      });
+    }
+
+    team.markModified('members');
+    await team.save();
+
+    return successResponse(res, {
+      leaderId: team.leaderId?.toString(),
+      leader: {
+        id: team.leaderId?.toString() || leadMember?.userId?.toString(),
+        name: updatedLeadUser?.name || leadMember?.name,
+        email: updatedLeadUser?.email || leadMember?.email,
+        registerNumber: updatedLeadUser?.registerNumber || leadMember?.registerNumber,
+        gender: updatedLeadUser?.gender || leadMember?.gender,
+        section: updatedLeadUser?.section || leadMember?.section,
+        mobile: updatedLeadUser?.mobile || leadMember?.mobileNumber,
+      },
+    }, 'Team Lead details updated successfully');
+  } catch (error) {
+    return errorResponse(res, error.message || 'Server error updating team lead', 500);
   }
 };
 
@@ -719,3 +958,4 @@ exports.adminRemoveTeamLead = async (req, res) => {
     return errorResponse(res, error.message || 'Server error', 500);
   }
 };
+
