@@ -67,7 +67,7 @@ export const Navbar: React.FC = () => {
             <Zap className="h-4 w-4 text-background font-bold" />
           </div>
           <span className="font-display text-lg font-black tracking-tight text-foreground">
-            NEXT<span className="text-primary">GEN</span>
+            BUILD<span className="text-primary">2</span>PITCH
           </span>
           {isAdmin && (
             <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple/10 border border-purple/30 text-purple-light text-[10px] font-bold uppercase tracking-wider">
