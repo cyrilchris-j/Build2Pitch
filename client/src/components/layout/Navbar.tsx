@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -22,7 +22,7 @@ const teamLeadLinks = [
   { to: '/team/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/team/members', label: 'Team', icon: Users },
   { to: '/team/idea', label: 'My Idea', icon: Lightbulb },
-  { to: '/team/instructions', label: 'Instructions', icon: FileText },
+  { to: '/team/instructions', label: 'Guide', icon: FileText },
   { to: '/team/submission', label: 'Submit', icon: Send },
 ];
 
@@ -41,6 +41,13 @@ export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const role = user?.role?.toUpperCase() || '';
   const isAdmin = role === 'ADMIN';
@@ -49,6 +56,12 @@ export const Navbar: React.FC = () => {
 
   const navLinks = isAdmin ? adminLinks : isLead ? teamLeadLinks : isMember ? memberLinks : [];
 
+  const dashboardPath = isAdmin
+    ? '/admin/dashboard'
+    : isLead
+    ? '/team/dashboard'
+    : '/member/dashboard';
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -56,17 +69,24 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+    <header
+      className={clsx(
+        'sticky top-0 z-50 transition-all duration-200',
+        scrolled
+          ? 'border-b border-border/60 bg-background/90 backdrop-blur-xl shadow-[0_1px_20px_rgba(0,0,0,0.4)]'
+          : 'border-b border-border/30 bg-background/70 backdrop-blur-lg'
+      )}
+    >
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Logo */}
+        {/* ── Logo ───────────────────────────────────────── */}
         <Link
-          to={isAuthenticated ? (isAdmin ? '/admin/dashboard' : isLead ? '/team/dashboard' : '/member/dashboard') : '/'}
+          to={isAuthenticated ? dashboardPath : '/'}
           className="flex items-center gap-2.5 shrink-0 group"
         >
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow-sm group-hover:shadow-glow-primary transition-shadow">
+          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow-sm group-hover:shadow-glow-primary transition-shadow duration-200">
             <Zap className="h-4 w-4 text-background font-bold" />
           </div>
-          <span className="font-display text-lg font-black tracking-tight text-foreground">
+          <span className="font-display text-lg font-black tracking-tight text-foreground leading-none">
             BUILD<span className="text-primary">2</span>PITCH
           </span>
           {isAdmin && (
@@ -77,16 +97,16 @@ export const Navbar: React.FC = () => {
           )}
         </Link>
 
-        {/* Desktop Nav Links */}
+        {/* ── Desktop Links ───────────────────────────────── */}
         {isAuthenticated && navLinks.length > 0 && (
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-0.5">
             {navLinks.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
                 className={({ isActive }) =>
                   clsx(
-                    'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150',
+                    'flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-150',
                     isActive
                       ? 'bg-primary/10 text-primary border border-primary/20'
                       : 'text-foreground-muted hover:text-foreground hover:bg-card'
@@ -100,76 +120,78 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Right side */}
-        <div className="flex items-center gap-3">
+        {/* ── Right Side ──────────────────────────────────── */}
+        <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
-              {/* User Badge */}
+              {/* User pill */}
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-border">
-                <div className="h-6 w-6 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/20 flex items-center justify-center">
                   <User className="h-3 w-3 text-primary" />
                 </div>
-                <span className="text-xs font-medium text-foreground-muted max-w-[120px] truncate">
+                <span className="text-xs font-medium text-foreground-muted max-w-[110px] truncate">
                   {user?.name?.split(' ')[0]}
                 </span>
               </div>
+              {/* Logout */}
               <button
                 onClick={handleLogout}
-                title="Logout"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-foreground-muted hover:text-danger hover:bg-danger/10 transition-all"
+                title="Sign Out"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-foreground-muted hover:text-danger hover:bg-danger/10 border border-transparent hover:border-danger/20 transition-all duration-150"
               >
                 <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span className="hidden sm:inline font-medium">Sign Out</span>
               </button>
             </>
           ) : (
             <div className="hidden sm:flex items-center gap-2">
               <Link
                 to="/login"
-                className="px-4 py-2 rounded-lg text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
+                className="px-4 py-2 rounded-xl text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-card transition-all"
               >
                 Sign In
               </Link>
               <Link
                 to="/register"
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-primary text-background hover:bg-primary-hover shadow-glow-sm transition-all"
+                className="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-background hover:bg-primary-hover shadow-glow-sm hover:shadow-glow-primary transition-all duration-200"
               >
                 Join Build2Pitch
               </Link>
             </div>
           )}
 
-          {/* Mobile menu toggle */}
+          {/* Mobile toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-card transition-colors"
+            className="md:hidden p-2 rounded-xl text-foreground-muted hover:text-foreground hover:bg-card border border-transparent hover:border-border transition-all"
+            aria-label="Toggle menu"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* ── Mobile Menu ───────────────────────────────────── */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden border-t border-border/60 bg-background/95 backdrop-blur-xl overflow-hidden"
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="md:hidden border-t border-border/60 bg-background-subtle/95 backdrop-blur-xl overflow-hidden"
           >
             <div className="px-4 py-4 space-y-1">
               {isAuthenticated ? (
                 <>
-                  {/* User info */}
-                  <div className="flex items-center gap-3 px-3 py-3 mb-3 bg-card rounded-xl border border-border">
-                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  {/* User card */}
+                  <div className="flex items-center gap-3 px-3 py-3 mb-2 bg-card rounded-2xl border border-border">
+                    <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/20 flex items-center justify-center shrink-0">
                       <User className="h-4 w-4 text-primary" />
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{user?.name}</p>
-                      <p className="text-xs text-foreground-subtle">{user?.email}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{user?.name}</p>
+                      <p className="text-xs text-foreground-subtle truncate">{user?.email}</p>
                     </div>
                   </div>
 
@@ -180,7 +202,7 @@ export const Navbar: React.FC = () => {
                       onClick={() => setMobileOpen(false)}
                       className={({ isActive }) =>
                         clsx(
-                          'flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all',
+                          'flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all',
                           isActive
                             ? 'bg-primary/10 text-primary border border-primary/20'
                             : 'text-foreground-muted hover:text-foreground hover:bg-card'
@@ -191,13 +213,13 @@ export const Navbar: React.FC = () => {
                         <Icon className="h-4 w-4" />
                         {label}
                       </div>
-                      <ChevronRight className="h-4 w-4 opacity-40" />
+                      <ChevronRight className="h-4 w-4 opacity-30" />
                     </NavLink>
                   ))}
 
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl text-sm font-medium text-danger hover:bg-danger/10 transition-all mt-3 border border-danger/20"
+                    className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-danger hover:bg-danger/10 border border-danger/20 transition-all mt-2"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign Out
@@ -208,23 +230,23 @@ export const Navbar: React.FC = () => {
                   <Link
                     to="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between px-3 py-3 rounded-xl text-sm text-foreground-muted hover:text-foreground hover:bg-card transition-all"
+                    className="flex items-center justify-between px-4 py-3 rounded-xl text-sm text-foreground-muted hover:text-foreground hover:bg-card transition-all"
                   >
                     Team Lead Login
-                    <ChevronRight className="h-4 w-4 opacity-40" />
+                    <ChevronRight className="h-4 w-4 opacity-30" />
                   </Link>
                   <Link
                     to="/member-login"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between px-3 py-3 rounded-xl text-sm text-foreground-muted hover:text-foreground hover:bg-card transition-all"
+                    className="flex items-center justify-between px-4 py-3 rounded-xl text-sm text-foreground-muted hover:text-foreground hover:bg-card transition-all"
                   >
                     Member Login
-                    <ChevronRight className="h-4 w-4 opacity-40" />
+                    <ChevronRight className="h-4 w-4 opacity-30" />
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold bg-primary text-background hover:bg-primary-hover transition-all mt-2"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold bg-primary text-background hover:bg-primary-hover transition-all mt-2 shadow-glow-sm"
                   >
                     Join Build2Pitch
                   </Link>

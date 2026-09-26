@@ -135,42 +135,42 @@ export const AdminIdeasPage: React.FC = () => {
     >
       {/* Summary Header Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-[#111111] border-[#242424]">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#8A8A8A]">TOTAL IDEAS</span>
-            <Sparkles className="h-4 w-4 text-[#E63946]" />
+            <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted">TOTAL IDEAS</span>
+            <Sparkles className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-[#FFFFFF] font-display">{ideas.length}</div>
+            <div className="text-2xl font-extrabold text-foreground font-display">{ideas.length}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#111111] border-[#242424]">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#8A8A8A]">ASSIGNED TO TEAMS</span>
-            <CheckCircle2 className="h-4 w-4 text-[#E63946]" />
+            <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted">ASSIGNED TO TEAMS</span>
+            <CheckCircle2 className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-[#FFFFFF] font-display">{totalAssigned}</div>
+            <div className="text-2xl font-extrabold text-foreground font-display">{totalAssigned}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#111111] border-[#242424]">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#8A8A8A]">UNUSED IDEAS</span>
-            <Clock className="h-4 w-4 text-[#8A8A8A]" />
+            <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted">UNUSED IDEAS</span>
+            <Clock className="h-4 w-4 text-foreground-muted" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-[#FFFFFF] font-display">{totalUnused}</div>
+            <div className="text-2xl font-extrabold text-foreground font-display">{totalUnused}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Ideas Data Table */}
-      <Card className="bg-[#111111] border-[#242424] p-0 overflow-hidden">
+      <Card className="bg-card border-border p-0 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-[#FFFFFF]">
-            <thead className="bg-[#070707] border-b border-[#242424] text-xs font-semibold uppercase tracking-wider text-[#8A8A8A]">
+          <table className="w-full text-left text-sm text-foreground">
+            <thead className="bg-background border-b border-border text-xs font-semibold uppercase tracking-wider text-foreground-muted">
               <tr>
                 <th className="py-3.5 px-4">Title</th>
                 <th className="py-3.5 px-4">Industry Track</th>
@@ -184,13 +184,13 @@ export const AdminIdeasPage: React.FC = () => {
             <tbody className="divide-y divide-[#242424]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-[#8A8A8A]">
+                  <td colSpan={7} className="text-center py-8 text-foreground-muted">
                     Loading startup ideas...
                   </td>
                 </tr>
               ) : ideas.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-[#8A8A8A]">
+                  <td colSpan={7} className="text-center py-8 text-foreground-muted">
                     No startup ideas found. Click "Add Startup Idea" to create one.
                   </td>
                 </tr>
@@ -199,19 +199,19 @@ export const AdminIdeasPage: React.FC = () => {
                   const ideaId = idea.id || idea._id || '';
                   return (
                     <tr key={ideaId} className="hover:bg-[#181818] transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-[#FFFFFF]">
+                      <td className="py-3.5 px-4 font-bold text-foreground">
                         {idea.title}
                       </td>
-                      <td className="py-3.5 px-4 text-[#8A8A8A] font-mono text-xs">
+                      <td className="py-3.5 px-4 text-foreground-muted font-mono text-xs">
                         {idea.industry}
                       </td>
-                      <td className="py-3.5 px-4 text-[#8A8A8A] max-w-xs truncate">
+                      <td className="py-3.5 px-4 text-foreground-muted max-w-xs truncate">
                         {idea.problemStatement}
                       </td>
-                      <td className="py-3.5 px-4 text-[#8A8A8A] max-w-xs truncate">
+                      <td className="py-3.5 px-4 text-foreground-muted max-w-xs truncate">
                         {idea.targetAudience}
                       </td>
-                      <td className="py-3.5 px-4 text-xs capitalize text-[#FFFFFF]">
+                      <td className="py-3.5 px-4 text-xs capitalize text-foreground">
                         {idea.complexityLevel || 'intermediate'}
                       </td>
                       <td className="py-3.5 px-4">
@@ -223,14 +223,14 @@ export const AdminIdeasPage: React.FC = () => {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleOpenEditModal(idea)}
-                            className="p-1.5 rounded bg-[#070707] border border-[#242424] text-[#8A8A8A] hover:text-[#FFFFFF] transition-colors"
+                            className="p-1.5 rounded bg-background border border-border text-foreground-muted hover:text-foreground transition-colors"
                             title="Edit Idea"
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteIdea(ideaId)}
-                            className="p-1.5 rounded bg-[#070707] border border-[#242424] text-[#E63946] hover:bg-[#E63946]/10 transition-colors"
+                            className="p-1.5 rounded bg-background border border-border text-primary hover:bg-primary/10 transition-colors"
                             title="Delete Idea"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -248,19 +248,19 @@ export const AdminIdeasPage: React.FC = () => {
 
       {/* Add / Edit Idea Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070707]/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-lg rounded-xl border border-[#242424] bg-[#111111] p-6 text-[#FFFFFF] space-y-4 my-8">
-            <div className="flex items-center justify-between border-b border-[#242424] pb-3">
-              <h3 className="text-lg font-bold text-[#FFFFFF]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 text-foreground space-y-4 my-8">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-lg font-bold text-foreground">
                 {editingIdea ? 'Edit Startup Idea' : 'Create Startup Idea'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-[#8A8A8A] hover:text-[#FFFFFF]">
+              <button onClick={() => setShowModal(false)} className="text-foreground-muted hover:text-foreground">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 rounded-lg border border-[#E63946] bg-[#111111] text-[#E63946] text-xs">
+              <div className="p-3 rounded-lg border border-primary bg-card text-primary text-xs">
                 {formError}
               </div>
             )}
@@ -281,10 +281,10 @@ export const AdminIdeasPage: React.FC = () => {
               />
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-[#8A8A8A]">Problem Statement *</label>
+                <label className="block text-xs font-medium text-foreground-muted">Problem Statement *</label>
                 <textarea
                   rows={3}
-                  className="w-full rounded-lg bg-[#111111] border border-[#242424] px-3.5 py-2 text-sm text-[#FFFFFF] placeholder:text-[#8A8A8A] focus:outline-none focus:border-[#E63946]"
+                  className="w-full rounded-lg bg-card border border-border px-3.5 py-2 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-primary"
                   placeholder="Describe the core market problem..."
                   value={formData.problemStatement}
                   onChange={(e) => setFormData({ ...formData, problemStatement: e.target.value })}
@@ -313,11 +313,11 @@ export const AdminIdeasPage: React.FC = () => {
               />
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-[#8A8A8A]">Complexity Level</label>
+                <label className="block text-xs font-medium text-foreground-muted">Complexity Level</label>
                 <select
                   value={formData.complexityLevel}
                   onChange={(e: any) => setFormData({ ...formData, complexityLevel: e.target.value })}
-                  className="w-full rounded-lg bg-[#111111] border border-[#242424] px-3.5 py-2 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#E63946]"
+                  className="w-full rounded-lg bg-card border border-border px-3.5 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
                 >
                   <option value="beginner">Beginner</option>
                   <option value="intermediate">Intermediate</option>
@@ -325,7 +325,7 @@ export const AdminIdeasPage: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#242424]">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
                 <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
                   Cancel
                 </Button>

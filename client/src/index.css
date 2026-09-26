@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 /* ============================================
-   CSS CUSTOM PROPERTIES — NEXTGEN Design Tokens
+   CSS CUSTOM PROPERTIES — Build2Pitch Design
    ============================================ */
 :root {
   /* Backgrounds */
@@ -61,6 +61,7 @@ body {
   color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 /* Selection highlight */
@@ -73,8 +74,8 @@ body {
    CUSTOM SCROLLBARS
    ============================================ */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: #070711;
@@ -84,7 +85,7 @@ body {
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #00D4FF33;
+  background: rgba(0, 212, 255, 0.2);
 }
 
 /* ============================================
@@ -242,4 +243,57 @@ body {
 
 .admin-table tbody tr:hover {
   background: rgba(0, 212, 255, 0.04);
+}
+
+/* ============================================
+   FORM INPUTS - Unified
+   ============================================ */
+.form-input {
+  width: 100%;
+  background: rgba(7, 7, 17, 0.8);
+  border: 1px solid #1E1E3A;
+  border-radius: 0.75rem;
+  padding: 0.65rem 1rem;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.08);
+}
+
+.form-input::placeholder {
+  color: #4A4F65;
+}
+
+/* ============================================
+   AUTH PAGE LAYOUT
+   ============================================ */
+.auth-card {
+  background: linear-gradient(135deg, rgba(15, 15, 30, 0.95), rgba(10, 10, 22, 0.98));
+  border: 1px solid #1E1E3A;
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.02);
+  backdrop-filter: blur(20px);
+}
+
+/* ============================================
+   PAGE TRANSITIONS
+   ============================================ */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeSlideUp 0.4s ease-out both;
 }

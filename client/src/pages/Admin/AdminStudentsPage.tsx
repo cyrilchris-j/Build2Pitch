@@ -67,16 +67,16 @@ export const AdminStudentsPage: React.FC = () => {
       subtitle="Comprehensive registry of all registered student developers, designers, and team leads."
     >
       {/* Search Header */}
-      <Card className="bg-[#111111] border-[#242424] p-4 mb-6">
+      <Card className="bg-card border-border p-4 mb-6">
         <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8A8A8A]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-muted" />
             <input
               type="text"
               placeholder="Search Student Name, Reg No, Email, or Team..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg bg-[#070707] border border-[#242424] pl-9 pr-3 py-2 text-sm text-[#FFFFFF] placeholder:text-[#8A8A8A] focus:outline-none focus:border-[#E63946]"
+              className="w-full rounded-lg bg-background border border-border pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-primary"
             />
           </div>
           <Button type="submit" variant="primary" size="sm">
@@ -86,10 +86,10 @@ export const AdminStudentsPage: React.FC = () => {
       </Card>
 
       {/* Dark Data Table */}
-      <Card className="bg-[#111111] border-[#242424] p-0 overflow-hidden mb-6">
+      <Card className="bg-card border-border p-0 overflow-hidden mb-6">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-[#FFFFFF]">
-            <thead className="bg-[#070707] border-b border-[#242424] text-xs font-semibold uppercase tracking-wider text-[#8A8A8A]">
+          <table className="w-full text-left text-sm text-foreground">
+            <thead className="bg-background border-b border-border text-xs font-semibold uppercase tracking-wider text-foreground-muted">
               <tr>
                 <th className="py-3.5 px-4">Register No</th>
                 <th className="py-3.5 px-4">Student Name</th>
@@ -104,41 +104,41 @@ export const AdminStudentsPage: React.FC = () => {
             <tbody className="divide-y divide-[#242424]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-[#8A8A8A]">
+                  <td colSpan={8} className="text-center py-8 text-foreground-muted">
                     Loading student directory...
                   </td>
                 </tr>
               ) : students.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-[#8A8A8A]">
+                  <td colSpan={8} className="text-center py-8 text-foreground-muted">
                     No student records found matching query.
                   </td>
                 </tr>
               ) : (
                 students.map((student) => (
                   <tr key={student.id} className="hover:bg-[#181818] transition-colors">
-                    <td className="py-3.5 px-4 font-mono text-xs font-bold text-[#E63946]">
+                    <td className="py-3.5 px-4 font-mono text-xs font-bold text-primary">
                       {student.registerNumber}
                     </td>
-                    <td className="py-3.5 px-4 font-semibold text-[#FFFFFF]">
+                    <td className="py-3.5 px-4 font-semibold text-foreground">
                       <div className="flex items-center gap-1.5">
-                        {student.isLeader && <Crown className="h-3.5 w-3.5 text-[#E63946]" />}
+                        {student.isLeader && <Crown className="h-3.5 w-3.5 text-primary" />}
                         <span>{student.name}</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-[#8A8A8A]">
+                    <td className="py-3.5 px-4 text-foreground-muted">
                       {student.email}
                     </td>
-                    <td className="py-3.5 px-4 text-xs font-mono text-[#8A8A8A]">
+                    <td className="py-3.5 px-4 text-xs font-mono text-foreground-muted">
                       {student.mobileNumber}
                     </td>
-                    <td className="py-3.5 px-4 text-[#8A8A8A]">
+                    <td className="py-3.5 px-4 text-foreground-muted">
                       {student.gender}
                     </td>
-                    <td className="py-3.5 px-4 text-[#8A8A8A]">
+                    <td className="py-3.5 px-4 text-foreground-muted">
                       {student.section}
                     </td>
-                    <td className="py-3.5 px-4 font-medium text-[#FFFFFF]">
+                    <td className="py-3.5 px-4 font-medium text-foreground">
                       {student.teamName}
                     </td>
                     <td className="py-3.5 px-4">
@@ -156,9 +156,9 @@ export const AdminStudentsPage: React.FC = () => {
 
       {/* Pagination Footer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <span className="text-xs text-[#8A8A8A]">
-          Page <span className="font-bold text-[#FFFFFF]">{page}</span> of{' '}
-          <span className="font-bold text-[#FFFFFF]">{totalPages}</span> ({totalRecords} Total Students)
+        <span className="text-xs text-foreground-muted">
+          Page <span className="font-bold text-foreground">{page}</span> of{' '}
+          <span className="font-bold text-foreground">{totalPages}</span> ({totalRecords} Total Students)
         </span>
         <div className="flex items-center gap-2">
           <Button

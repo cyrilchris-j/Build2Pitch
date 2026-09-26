@@ -170,15 +170,15 @@ export const TeamDashboardPage: React.FC = () => {
   }
 
   return (
-    <PageContainer className="min-h-[calc(100vh-4rem)] bg-[#070707]">
+    <PageContainer className="min-h-[calc(100vh-4rem)] bg-background">
       {isOffline && (
         <Card
           glass={false}
-          className="mb-6 border-[#E63946]/40 shadow-[0_0_22px_-6px_rgba(230,57,70,0.4)]"
+          className="mb-6 border-danger/40 shadow-[0_0_22px_-6px_rgba(239,68,68,0.3)]"
         >
           <CardContent className="flex items-center gap-3 py-3">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-[#E63946]" />
-            <p className="text-sm text-[#8A8A8A]">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-danger" />
+            <p className="text-sm text-foreground-muted">
               Live API is unavailable — showing an offline snapshot. Deliverable statuses are
               presentational defaults until the backend is reachable.
             </p>

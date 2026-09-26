@@ -97,29 +97,29 @@ export const AdminTeamsPage: React.FC = () => {
       subtitle="Inspect and manage all registered teams, rosters, table assignments, and startup ideas."
     >
       {/* Search & Filter Controls */}
-      <Card className="bg-[#111111] border-[#242424] p-4 mb-6">
+      <Card className="bg-card border-border p-4 mb-6">
         <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8A8A8A]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-muted" />
             <input
               type="text"
               placeholder="Search Team ID, Name, or Lead..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg bg-[#070707] border border-[#242424] pl-9 pr-3 py-2 text-sm text-[#FFFFFF] placeholder:text-[#8A8A8A] focus:outline-none focus:border-[#E63946]"
+              className="w-full rounded-lg bg-background border border-border pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-primary"
             />
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-[#8A8A8A]" />
+              <Filter className="h-4 w-4 text-foreground-muted" />
               <select
                 value={filter}
                 onChange={(e) => {
                   setFilter(e.target.value);
                   setPage(1);
                 }}
-                className="rounded-lg bg-[#070707] border border-[#242424] px-3 py-2 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#E63946]"
+                className="rounded-lg bg-background border border-border px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
               >
                 <option value="all">All Teams</option>
                 <option value="registered">Registered</option>
@@ -136,10 +136,10 @@ export const AdminTeamsPage: React.FC = () => {
       </Card>
 
       {/* Dark Table Layout */}
-      <Card className="bg-[#111111] border-[#242424] p-0 overflow-hidden mb-6">
+      <Card className="bg-card border-border p-0 overflow-hidden mb-6">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-[#FFFFFF]">
-            <thead className="bg-[#070707] border-b border-[#242424] text-xs font-semibold uppercase tracking-wider text-[#8A8A8A]">
+          <table className="w-full text-left text-sm text-foreground">
+            <thead className="bg-background border-b border-border text-xs font-semibold uppercase tracking-wider text-foreground-muted">
               <tr>
                 <th className="py-3.5 px-4">Team ID / Code</th>
                 <th className="py-3.5 px-4">Team Name</th>
@@ -154,13 +154,13 @@ export const AdminTeamsPage: React.FC = () => {
             <tbody className="divide-y divide-[#242424]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-[#8A8A8A]">
+                  <td colSpan={8} className="text-center py-8 text-foreground-muted">
                     Loading team records...
                   </td>
                 </tr>
               ) : teams.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-[#8A8A8A]">
+                  <td colSpan={8} className="text-center py-8 text-foreground-muted">
                     No teams found matching search/filter criteria.
                   </td>
                 </tr>
@@ -171,25 +171,25 @@ export const AdminTeamsPage: React.FC = () => {
                   return (
                     <React.Fragment key={team.id}>
                       <tr className="hover:bg-[#181818] transition-colors">
-                        <td className="py-3.5 px-4 font-mono font-bold text-[#E63946]">
+                        <td className="py-3.5 px-4 font-mono font-bold text-primary">
                           {team.teamCode || team.id}
                         </td>
-                        <td className="py-3.5 px-4 font-semibold text-[#FFFFFF]">
+                        <td className="py-3.5 px-4 font-semibold text-foreground">
                           {team.name}
                         </td>
-                        <td className="py-3.5 px-4 text-[#FFFFFF]">
+                        <td className="py-3.5 px-4 text-foreground">
                           {leadName}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center gap-1 font-semibold text-[#FFFFFF]">
-                            <Users className="h-3.5 w-3.5 text-[#E63946]" />
+                          <span className="inline-flex items-center gap-1 font-semibold text-foreground">
+                            <Users className="h-3.5 w-3.5 text-primary" />
                             {team.members.length}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-[#8A8A8A]">
+                        <td className="py-3.5 px-4 text-foreground-muted">
                           {team.ideaAssignment?.ideaTitle || 'Not Selected'}
                         </td>
-                        <td className="py-3.5 px-4 text-xs font-mono text-[#8A8A8A]">
+                        <td className="py-3.5 px-4 text-xs font-mono text-foreground-muted">
                           {team.ideaAssignment?.assignedAt
                             ? new Date(team.ideaAssignment.assignedAt).toLocaleDateString()
                             : 'N/A'}
@@ -202,41 +202,41 @@ export const AdminTeamsPage: React.FC = () => {
                         <td className="py-3.5 px-4 text-right">
                           <button
                             onClick={() => toggleExpandRoster(team.id)}
-                            className="p-1 rounded bg-[#070707] border border-[#242424] text-[#8A8A8A] hover:text-[#FFFFFF] transition-colors"
+                            className="p-1 rounded bg-background border border-border text-foreground-muted hover:text-foreground transition-colors"
                             aria-label="Expand roster"
                           >
-                            {isExpanded ? <ChevronUp className="h-4 w-4 text-[#E63946]" /> : <ChevronDown className="h-4 w-4" />}
+                            {isExpanded ? <ChevronUp className="h-4 w-4 text-primary" /> : <ChevronDown className="h-4 w-4" />}
                           </button>
                         </td>
                       </tr>
 
                       {/* Expanded Roster Row */}
                       {isExpanded && (
-                        <tr className="bg-[#070707]">
-                          <td colSpan={8} className="p-4 border-b border-[#242424]">
+                        <tr className="bg-background">
+                          <td colSpan={8} className="p-4 border-b border-border">
                             <div className="space-y-3">
-                              <h4 className="text-xs font-bold uppercase tracking-wider text-[#E63946] flex items-center gap-1.5">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
                                 <Users className="h-4 w-4" /> Team Roster &amp; Student Registration Details
                               </h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {team.members.map((member, mIdx) => (
                                   <div
                                     key={mIdx}
-                                    className="p-3 rounded-lg border border-[#242424] bg-[#111111] space-y-1 text-xs"
+                                    className="p-3 rounded-lg border border-border bg-card space-y-1 text-xs"
                                   >
-                                    <div className="flex items-center justify-between font-bold text-[#FFFFFF]">
+                                    <div className="flex items-center justify-between font-bold text-foreground">
                                       <span>{member.name}</span>
                                       <Badge variant="muted" className="text-[10px] lowercase">
                                         {member.role}
                                       </Badge>
                                     </div>
-                                    <div className="text-[#8A8A8A] flex items-center gap-1">
-                                      <BookOpen className="h-3 w-3 text-[#E63946]" /> Reg: <span className="text-[#FFFFFF] font-mono">{member.registerNumber || 'REG-2026'}</span>
+                                    <div className="text-foreground-muted flex items-center gap-1">
+                                      <BookOpen className="h-3 w-3 text-primary" /> Reg: <span className="text-foreground font-mono">{member.registerNumber || 'REG-2026'}</span>
                                     </div>
-                                    <div className="text-[#8A8A8A] flex items-center gap-1">
-                                      <Mail className="h-3 w-3 text-[#8A8A8A]" /> {member.email}
+                                    <div className="text-foreground-muted flex items-center gap-1">
+                                      <Mail className="h-3 w-3 text-foreground-muted" /> {member.email}
                                     </div>
-                                    <div className="text-[#8A8A8A] flex items-center gap-1 justify-between pt-1 border-t border-[#242424]">
+                                    <div className="text-foreground-muted flex items-center gap-1 justify-between pt-1 border-t border-border">
                                       <span>Mobile: {member.mobileNumber || 'N/A'}</span>
                                       <span>Sec: {member.section || 'A'}</span>
                                     </div>
@@ -258,9 +258,9 @@ export const AdminTeamsPage: React.FC = () => {
 
       {/* Pagination Footer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <span className="text-xs text-[#8A8A8A]">
-          Page <span className="font-bold text-[#FFFFFF]">{page}</span> of{' '}
-          <span className="font-bold text-[#FFFFFF]">{totalPages}</span> ({totalRecords} Total Records)
+        <span className="text-xs text-foreground-muted">
+          Page <span className="font-bold text-foreground">{page}</span> of{' '}
+          <span className="font-bold text-foreground">{totalPages}</span> ({totalRecords} Total Records)
         </span>
         <div className="flex items-center gap-2">
           <Button

@@ -181,16 +181,16 @@ export const TeamSubmissionPage: React.FC = () => {
       {/* Progress & Alert Banners */}
       <div className="mb-8 space-y-4">
         {/* Progress Card */}
-        <Card className="p-5 border-[#242424] bg-[#111111]">
+        <Card className="p-5 border-border bg-card">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-            <span className="text-sm font-semibold text-[#FFFFFF]">
+            <span className="text-sm font-semibold text-foreground">
               Required Deliverables Completion ({completedCount} / {requiredFields.length})
             </span>
-            <span className="text-xs font-mono font-bold text-[#E63946]">{progressPercent}%</span>
+            <span className="text-xs font-mono font-bold text-primary">{progressPercent}%</span>
           </div>
           <div className="w-full bg-[#242424] h-2.5 rounded-full overflow-hidden">
             <div
-              className="bg-[#E63946] h-full transition-all duration-300 rounded-full"
+              className="bg-primary h-full transition-all duration-300 rounded-full"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -198,55 +198,55 @@ export const TeamSubmissionPage: React.FC = () => {
 
         {/* Authorization Banner for Members */}
         {!isTeamLead && (
-          <div className="flex items-center gap-3 p-4 rounded-xl border border-[#242424] bg-[#111111] text-[#FFFFFF]">
-            <ShieldAlert className="h-5 w-5 text-[#E63946] shrink-0" />
+          <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card text-foreground">
+            <ShieldAlert className="h-5 w-5 text-primary shrink-0" />
             <div className="text-sm">
-              <span className="font-bold text-[#E63946]">Team Member View:</span> Only the authenticated <span className="font-bold">Team Lead</span> has permission to save or finalize startup submissions.
+              <span className="font-bold text-primary">Team Member View:</span> Only the authenticated <span className="font-bold">Team Lead</span> has permission to save or finalize startup submissions.
             </div>
           </div>
         )}
 
         {/* Locked Banner */}
         {isLocked && (
-          <div className="flex items-center gap-3 p-4 rounded-xl border border-[#242424] bg-[#111111] text-[#FFFFFF]">
-            <Lock className="h-5 w-5 text-[#E63946] shrink-0" />
+          <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card text-foreground">
+            <Lock className="h-5 w-5 text-primary shrink-0" />
             <div className="text-sm">
-              <span className="font-bold text-[#E63946]">Submission Locked:</span> Your team's startup deliverables have been submitted successfully and are currently locked for judging.
+              <span className="font-bold text-primary">Submission Locked:</span> Your team's startup deliverables have been submitted successfully and are currently locked for judging.
             </div>
           </div>
         )}
 
         {/* Error / Success Notifications */}
         {error && (
-          <div className="p-4 rounded-xl border border-[#E63946] bg-[#111111] text-[#E63946] text-sm flex items-center gap-2">
+          <div className="p-4 rounded-xl border border-primary bg-card text-primary text-sm flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="p-4 rounded-xl border border-[#242424] bg-[#111111] text-[#FFFFFF] text-sm flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-[#E63946] shrink-0" />
+          <div className="p-4 rounded-xl border border-border bg-card text-foreground text-sm flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
             <span>{successMessage}</span>
           </div>
         )}
       </div>
 
       {/* Deliverable Card with Single Master 2-Column Form Grid */}
-      <Card className="bg-[#111111] border-[#242424]">
-        <CardHeader className="border-b border-[#242424] pb-6">
-          <CardTitle className="text-[#FFFFFF]">STARTUP DELIVERABLES SUBMISSION</CardTitle>
-          <CardDescription className="text-[#8A8A8A]">
+      <Card className="bg-card border-border">
+        <CardHeader className="border-b border-border pb-6">
+          <CardTitle className="text-foreground">STARTUP DELIVERABLES SUBMISSION</CardTitle>
+          <CardDescription className="text-foreground-muted">
             Provide valid public URLs for all required branding, product, media, and pitch assets.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 sm:p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* SECTION 1: BRANDING */}
-            <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-[#E63946] pb-2 border-b border-[#242424]">
+            <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-primary pb-2 border-b border-border">
               <Image className="h-5 w-5" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#FFFFFF]">1. BRANDING</h3>
-              <span className="text-xs text-[#8A8A8A] font-normal ml-2 hidden sm:inline">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">1. BRANDING</h3>
+              <span className="text-xs text-foreground-muted font-normal ml-2 hidden sm:inline">
                 Image assets for your startup identity
               </span>
             </div>
@@ -290,10 +290,10 @@ export const TeamSubmissionPage: React.FC = () => {
             />
 
             {/* SECTION 2: PRODUCT */}
-            <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-[#E63946] pt-4 pb-2 border-b border-[#242424]">
+            <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-primary pt-4 pb-2 border-b border-border">
               <Globe className="h-5 w-5" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#FFFFFF]">2. PRODUCT</h3>
-              <span className="text-xs text-[#8A8A8A] font-normal ml-2 hidden sm:inline">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">2. PRODUCT</h3>
+              <span className="text-xs text-foreground-muted font-normal ml-2 hidden sm:inline">
                 Public code repository and deployed application
               </span>
             </div>
@@ -318,10 +318,10 @@ export const TeamSubmissionPage: React.FC = () => {
             />
 
             {/* SECTION 3: MEDIA */}
-            <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-[#E63946] pt-4 pb-2 border-b border-[#242424]">
+            <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-primary pt-4 pb-2 border-b border-border">
               <Video className="h-5 w-5" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#FFFFFF]">3. MEDIA</h3>
-              <span className="text-xs text-[#8A8A8A] font-normal ml-2 hidden sm:inline">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">3. MEDIA</h3>
+              <span className="text-xs text-foreground-muted font-normal ml-2 hidden sm:inline">
                 5-minute pitch video explaining your startup
               </span>
             </div>
@@ -339,10 +339,10 @@ export const TeamSubmissionPage: React.FC = () => {
             </div>
 
             {/* SECTION 4: OPTIONAL */}
-            <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-[#E63946] pt-4 pb-2 border-b border-[#242424]">
+            <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-primary pt-4 pb-2 border-b border-border">
               <FileText className="h-5 w-5" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#FFFFFF]">4. OPTIONAL</h3>
-              <span className="text-xs text-[#8A8A8A] font-normal ml-2 hidden sm:inline">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">4. OPTIONAL</h3>
+              <span className="text-xs text-foreground-muted font-normal ml-2 hidden sm:inline">
                 Pitch deck presentation and business model notes
               </span>
             </div>
@@ -357,12 +357,12 @@ export const TeamSubmissionPage: React.FC = () => {
             />
 
             <div className="w-full">
-              <label className="block mb-2 text-xs font-semibold uppercase tracking-wider text-[#FFFFFF]">
+              <label className="block mb-2 text-xs font-semibold uppercase tracking-wider text-foreground">
                 Business Model / Pitch Notes (Optional)
               </label>
               <textarea
                 rows={3}
-                className="w-full box-border rounded-lg bg-[#111111] border border-[#242424] p-3.5 text-sm text-[#FFFFFF] placeholder:text-[#8A8A8A] focus:outline-none focus:border-[#E63946] focus:ring-1 focus:ring-[#E63946] disabled:opacity-50"
+                className="w-full box-border rounded-lg bg-card border border-border p-3.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
                 placeholder="Outline unit economics, pricing strategy, target TAM/SAM, or judge notes..."
                 value={submission.businessModel || submission.finalPitchNotes || ''}
                 onChange={(e) => {
@@ -374,12 +374,12 @@ export const TeamSubmissionPage: React.FC = () => {
             </div>
             {/* 5. SUBMISSION ACTIONS */}
             {isTeamLead && !isLocked && (
-              <div className="col-span-1 md:col-span-2 pt-6 mt-2 border-t border-[#242424] flex flex-col sm:flex-row items-center justify-end gap-3">
+              <div className="col-span-1 md:col-span-2 pt-6 mt-2 border-t border-border flex flex-col sm:flex-row items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={handleSaveDraft}
                   disabled={isSaving || isSubmitting}
-                  className="w-full sm:w-auto h-[46px] px-5 rounded-lg bg-[#111111] border border-[#242424] text-[#FFFFFF] hover:bg-[#1A1A1A] hover:border-[#333333] transition-colors text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto h-[46px] px-5 rounded-lg bg-card border border-border text-foreground hover:bg-[#1A1A1A] hover:border-[#333333] transition-colors text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="h-4 w-4" />
                   {isSaving ? 'Saving...' : 'Save Submission'}
@@ -388,7 +388,7 @@ export const TeamSubmissionPage: React.FC = () => {
                   type="button"
                   onClick={handleInitiateFinalSubmit}
                   disabled={isSaving || isSubmitting}
-                  className="w-full sm:w-auto h-[46px] px-5 rounded-lg bg-[#E63946] border border-[#E63946] text-[#FFFFFF] hover:bg-[#D62839] transition-colors text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto h-[46px] px-5 rounded-lg bg-primary border border-primary text-foreground hover:bg-primary-hover transition-colors text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="h-4 w-4" />
                   {isSubmitting ? 'Submitting...' : 'Final Submit'}
@@ -401,16 +401,16 @@ export const TeamSubmissionPage: React.FC = () => {
 
       {/* Confirmation Modal before Final Submit */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070707]/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-xl border border-[#242424] bg-[#111111] p-6 text-[#FFFFFF] space-y-4">
-            <div className="flex items-center gap-3 text-[#E63946]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 text-foreground space-y-4">
+            <div className="flex items-center gap-3 text-primary">
               <AlertTriangle className="h-6 w-6 shrink-0" />
               <h3 className="text-lg font-bold">Are you sure you want to submit your startup?</h3>
             </div>
-            <p className="text-sm text-[#8A8A8A] leading-relaxed">
+            <p className="text-sm text-foreground-muted leading-relaxed">
               After final submission, you will not be able to edit your submission.
             </p>
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#242424]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
               <Button
                 variant="outline"
                 onClick={() => setShowConfirmModal(false)}
@@ -430,16 +430,16 @@ export const TeamSubmissionPage: React.FC = () => {
 
       {/* Final Submission Success Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070707]/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-xl border border-[#242424] bg-[#111111] p-6 text-[#FFFFFF] space-y-4 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#111111] border border-[#242424] text-[#E63946]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 text-foreground space-y-4 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-card border border-border text-primary">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h3 className="text-xl font-bold text-[#FFFFFF]">Startup Submitted Successfully!</h3>
-            <p className="text-sm text-[#8A8A8A]">
+            <h3 className="text-xl font-bold text-foreground">Startup Submitted Successfully!</h3>
+            <p className="text-sm text-foreground-muted">
               Your startup has been submitted successfully.
             </p>
-            <div className="pt-4 border-t border-[#242424]">
+            <div className="pt-4 border-t border-border">
               <Button
                 variant="primary"
                 className="w-full"

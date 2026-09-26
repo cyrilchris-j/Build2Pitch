@@ -151,8 +151,8 @@ const CHECKLIST: ChecklistItem[] = [
 ];
 
 const SectionEyebrow: React.FC<{ label: string }> = ({ label }) => (
-  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.25em] text-[#E63946]">
-    <span className="h-1.5 w-1.5 rounded-full bg-[#E63946] shadow-[0_0_8px_rgba(230,57,70,0.9)]" />
+  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.25em] text-primary">
+    <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(230,57,70,0.9)]" />
     {label}
   </div>
 );
@@ -165,29 +165,29 @@ const SectionHeading: React.FC<{
   <div className="space-y-1.5">
     <SectionEyebrow label={eyebrow} />
     <CardTitle className="text-white">{title}</CardTitle>
-    <CardDescription className="text-[#8A8A8A]">{description}</CardDescription>
+    <CardDescription className="text-foreground-muted">{description}</CardDescription>
   </div>
 );
 
 export const TeamInstructionsPage: React.FC = () => {
   return (
-    <PageContainer className="min-h-[calc(100vh-4rem)] bg-[#070707]">
+    <PageContainer className="min-h-[calc(100vh-4rem)] bg-background">
       <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
         {/* HERO */}
         <motion.section variants={fadeUp}>
           <Card
             glass={false}
-            className="relative overflow-hidden border-[#242424] shadow-[0_0_50px_-10px_rgba(230,57,70,0.45)]"
+            className="relative overflow-hidden border-border shadow-[0_0_50px_-10px_rgba(230,57,70,0.45)]"
           >
             <div className="pointer-events-none absolute -inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E63946]/60 to-transparent" />
-            <div className="pointer-events-none absolute -top-32 -right-24 h-80 w-80 rounded-full bg-[#E63946]/10 blur-3xl" />
+            <div className="pointer-events-none absolute -top-32 -right-24 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-28 -left-20 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
 
             <div className="relative flex flex-col gap-7">
               <div className="flex items-center gap-2 text-white">
-                <Rocket className="h-5 w-5 text-[#E63946]" />
+                <Rocket className="h-5 w-5 text-primary" />
                 <span className="font-display text-sm font-extrabold uppercase tracking-[0.2em]">
-                  BUILD<span className="text-[#E63946]">2</span>PITCH
+                  BUILD<span className="text-primary">2</span>PITCH
                 </span>
               </div>
 
@@ -200,17 +200,17 @@ export const TeamInstructionsPage: React.FC = () => {
                   </h1>
                   <div className="hidden h-28 w-1 shrink-0 bg-gradient-to-b from-[#E63946] via-[#E63946]/40 to-transparent lg:block" />
                 </div>
-                <p className="max-w-2xl text-base text-[#8A8A8A] sm:text-lg">
+                <p className="max-w-2xl text-base text-foreground-muted sm:text-lg">
                   Everything your team needs to know before building, submitting, and pitching your
                   startup.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5 border-t border-[#242424]/60 pt-5">
-                <Badge className="bg-[#E63946]/15 text-[#E63946] border-[#E63946]/30">
+              <div className="flex flex-wrap items-center gap-2.5 border-t border-border/60 pt-5">
+                <Badge className="bg-primary/15 text-primary border-primary/30">
                   IDEATION → BUILD → DEPLOY → PITCH
                 </Badge>
-                <Badge variant="muted" className="text-[#8A8A8A] border-[#242424] bg-[#111111]">
+                <Badge variant="muted" className="text-foreground-muted border-border bg-card">
                   OFFICIAL CHALLENGE BRIEF
                 </Badge>
               </div>
@@ -220,14 +220,14 @@ export const TeamInstructionsPage: React.FC = () => {
 
         {/* WHAT IS BUILD2PITCH */}
         <motion.section variants={fadeUp}>
-          <Card glass={false} className="border-[#242424]">
+          <Card glass={false} className="border-border">
             <CardHeader>
               <SectionHeading
                 eyebrow="THE MISSION"
                 title="What Is BUILD2PITCH?"
                 description="One day. One startup. One winning pitch."
               />
-              <CardDescription className="text-[#8A8A8A]">
+              <CardDescription className="text-foreground-muted">
                 BUILD2PITCH is a startup-building challenge where student teams transform an idea
                 into a startup concept, build their brand and product, and present their solution
                 through a final pitch.
@@ -238,7 +238,7 @@ export const TeamInstructionsPage: React.FC = () => {
 
         {/* TEAM RULES */}
         <motion.section variants={fadeUp}>
-          <Card glass={false} className="border-[#242424]">
+          <Card glass={false} className="border-border">
             <CardHeader>
               <SectionHeading
                 eyebrow="THE TEAM"
@@ -253,14 +253,14 @@ export const TeamInstructionsPage: React.FC = () => {
                     key={title}
                     whileHover={{ y: -3 }}
                     transition={{ duration: 0.2 }}
-                    className="group flex items-start gap-3 rounded-lg border border-[#242424]/70 bg-[#161616]/70 p-4 transition-colors hover:border-[#E63946]/40"
+                    className="group flex items-start gap-3 rounded-lg border border-border/70 bg-[#161616]/70 p-4 transition-colors hover:border-primary/40"
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E63946]/30 bg-[#E63946]/10 text-[#E63946]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary">
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-white">{title}</p>
-                      <p className="mt-0.5 text-xs leading-relaxed text-[#8A8A8A]">{description}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">{description}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -273,10 +273,10 @@ export const TeamInstructionsPage: React.FC = () => {
         <motion.section variants={fadeUp}>
           <Card
             glass={false}
-            className="relative overflow-hidden border-[#E63946]/30 shadow-[0_0_40px_-10px_rgba(230,57,70,0.35)]"
+            className="relative overflow-hidden border-primary/30 shadow-[0_0_40px_-10px_rgba(230,57,70,0.35)]"
           >
             <div className="pointer-events-none absolute -inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E63946]/60 to-transparent" />
-            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#E63946]/10 blur-3xl" />
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
 
             <CardHeader>
               <SectionHeading
@@ -288,11 +288,11 @@ export const TeamInstructionsPage: React.FC = () => {
 
             <CardContent>
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-[#E63946]/40 bg-gradient-to-b from-[#1A0D0F] to-[#111111] px-6 py-8 text-center">
-                  <span className="font-display text-7xl font-black leading-none text-[#E63946] drop-shadow-[0_0_18px_rgba(230,57,70,0.55)]">
+                <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-primary/40 bg-gradient-to-b from-[#1A0D0F] to-[#111111] px-6 py-8 text-center">
+                  <span className="font-display text-7xl font-black leading-none text-primary drop-shadow-[0_0_18px_rgba(230,57,70,0.55)]">
                     2
                   </span>
-                  <span className="text-xs font-bold uppercase tracking-[0.25em] text-[#8A8A8A]">
+                  <span className="text-xs font-bold uppercase tracking-[0.25em] text-foreground-muted">
                     Chances Available
                   </span>
                 </div>
@@ -301,14 +301,14 @@ export const TeamInstructionsPage: React.FC = () => {
                   {IDEA_CHANCES.map(({ icon: Icon, title, description }) => (
                     <div
                       key={title}
-                      className="flex items-start gap-3 rounded-lg border border-[#242424]/70 bg-[#161616]/70 p-4"
+                      className="flex items-start gap-3 rounded-lg border border-border/70 bg-[#161616]/70 p-4"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E63946]/30 bg-[#E63946]/10 text-[#E63946]">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary">
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-white">{title}</p>
-                        <p className="mt-0.5 text-xs leading-relaxed text-[#8A8A8A]">{description}</p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">{description}</p>
                       </div>
                     </div>
                   ))}
@@ -320,7 +320,7 @@ export const TeamInstructionsPage: React.FC = () => {
 
         {/* DELIVERABLES */}
         <motion.section variants={fadeUp}>
-          <Card glass={false} className="border-[#242424]">
+          <Card glass={false} className="border-border">
             <CardHeader>
               <SectionHeading
                 eyebrow="WHAT TO BUILD"
@@ -335,9 +335,9 @@ export const TeamInstructionsPage: React.FC = () => {
                     key={title}
                     whileHover={{ y: -3 }}
                     transition={{ duration: 0.2 }}
-                    className="group flex items-start gap-3 rounded-lg border border-[#242424]/70 bg-[#161616]/70 p-4 transition-colors hover:border-[#E63946]/40"
+                    className="group flex items-start gap-3 rounded-lg border border-border/70 bg-[#161616]/70 p-4 transition-colors hover:border-primary/40"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#242424] bg-[#111111] text-[#E63946]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-primary">
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
@@ -347,7 +347,7 @@ export const TeamInstructionsPage: React.FC = () => {
                         </span>
                         <p className="truncate text-sm font-semibold text-white">{title}</p>
                       </div>
-                      <p className="mt-1 text-xs leading-relaxed text-[#8A8A8A]">{description}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-foreground-muted">{description}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -360,7 +360,7 @@ export const TeamInstructionsPage: React.FC = () => {
         <motion.section variants={fadeUp}>
           <Card
             glass={false}
-            className="relative overflow-hidden border-[#E63946]/30 shadow-[0_0_40px_-10px_rgba(230,57,70,0.35)]"
+            className="relative overflow-hidden border-primary/30 shadow-[0_0_40px_-10px_rgba(230,57,70,0.35)]"
           >
             <div className="pointer-events-none absolute -inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E63946]/60 to-transparent" />
 
@@ -376,15 +376,15 @@ export const TeamInstructionsPage: React.FC = () => {
                 {PITCH_REQUIREMENTS.map(({ step, title, question, icon: Icon }) => (
                   <div
                     key={step}
-                    className="flex items-start gap-3 rounded-lg border border-[#242424]/70 bg-[#161616]/70 p-4"
+                    className="flex items-start gap-3 rounded-lg border border-border/70 bg-[#161616]/70 p-4"
                   >
                     <div className="flex flex-col items-center gap-1">
-                      <span className="font-mono text-xs font-bold text-[#E63946]">{step}</span>
-                      <Icon className="h-4 w-4 text-[#8A8A8A]" />
+                      <span className="font-mono text-xs font-bold text-primary">{step}</span>
+                      <Icon className="h-4 w-4 text-foreground-muted" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-white">{title}</p>
-                      <p className="mt-0.5 text-xs leading-relaxed text-[#8A8A8A]">{question}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">{question}</p>
                     </div>
                   </div>
                 ))}
@@ -395,7 +395,7 @@ export const TeamInstructionsPage: React.FC = () => {
 
         {/* TEAM CHECKLIST */}
         <motion.section variants={fadeUp}>
-          <Card glass={false} className="border-[#242424]">
+          <Card glass={false} className="border-border">
             <CardHeader>
               <SectionHeading
                 eyebrow="FINAL CHECK"
@@ -408,9 +408,9 @@ export const TeamInstructionsPage: React.FC = () => {
                 {CHECKLIST.map(({ icon: Icon, label }) => (
                   <div
                     key={label}
-                    className="flex items-center gap-3 rounded-lg border border-[#242424]/70 bg-[#161616]/60 px-4 py-3"
+                    className="flex items-center gap-3 rounded-lg border border-border/70 bg-[#161616]/60 px-4 py-3"
                   >
-                    <CheckCircle2 className="h-5 w-5 shrink-0 text-[#E63946]" />
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                     <span className="flex-1 text-sm text-white">{label}</span>
                     <Icon className="h-4 w-4 shrink-0 text-[#6E6E6E]" />
                   </div>
@@ -424,20 +424,20 @@ export const TeamInstructionsPage: React.FC = () => {
         <motion.section variants={fadeUp}>
           <Card
             glass={false}
-            className="relative overflow-hidden border-[#242424] py-12 text-center shadow-[0_0_50px_-10px_rgba(230,57,70,0.4)]"
+            className="relative overflow-hidden border-border py-12 text-center shadow-[0_0_50px_-10px_rgba(230,57,70,0.4)]"
           >
             <div className="pointer-events-none absolute -inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E63946]/60 to-transparent" />
-            <div className="pointer-events-none absolute left-1/2 top-0 h-56 w-96 -translate-x-1/2 rounded-full bg-[#E63946]/10 blur-3xl" />
+            <div className="pointer-events-none absolute left-1/2 top-0 h-56 w-96 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
 
             <div className="relative space-y-4">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[#E63946]/40 bg-[#E63946]/10 text-[#E63946] shadow-[0_0_20px_-4px_rgba(230,57,70,0.7)]">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-primary shadow-[0_0_20px_-4px_rgba(230,57,70,0.7)]">
                 <Rocket className="h-5 w-5" />
               </div>
               <h2 className="font-display text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
-                BUILD<span className="text-[#E63946]">.</span>&nbsp;BRAND<span className="text-[#E63946]">.</span>&nbsp;DEPLOY
-                <span className="text-[#E63946]">.</span>&nbsp;PITCH<span className="text-[#E63946]">.</span>
+                BUILD<span className="text-primary">.</span>&nbsp;BRAND<span className="text-primary">.</span>&nbsp;DEPLOY
+                <span className="text-primary">.</span>&nbsp;PITCH<span className="text-primary">.</span>
               </h2>
-              <p className="text-sm text-[#8A8A8A] sm:text-base">
+              <p className="text-sm text-foreground-muted sm:text-base">
                 Turn your idea into something real.
               </p>
             </div>

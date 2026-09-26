@@ -26,23 +26,35 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   }[maxWidth];
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-[#070707] text-[#FFFFFF] pb-16 overflow-hidden">
-      <main className={cn('relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8', maxWClass, className)}>
+    <div className="relative min-h-[calc(100vh-4rem)] bg-background text-foreground pb-16 overflow-hidden">
+      {/* Subtle ambient background */}
+      <div className="absolute inset-0 bg-hero-gradient pointer-events-none opacity-60" />
+      <div className="absolute inset-0 grid-texture opacity-20 pointer-events-none" />
+
+      <main
+        className={cn(
+          'relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8',
+          maxWClass,
+          className
+        )}
+      >
         {(title || subtitle || actions) && (
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-[#242424] pb-6">
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border pb-6">
             <div>
               {title && (
-                <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-[#FFFFFF]">
+                <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                   {title}
                 </h1>
               )}
               {subtitle && (
-                <p className="mt-1.5 text-sm text-[#8A8A8A] leading-relaxed">
+                <p className="mt-1.5 text-sm text-foreground-muted leading-relaxed">
                   {subtitle}
                 </p>
               )}
             </div>
-            {actions && <div className="flex items-center gap-3 shrink-0 sm:self-start">{actions}</div>}
+            {actions && (
+              <div className="flex items-center gap-3 shrink-0 sm:self-start">{actions}</div>
+            )}
           </div>
         )}
         {children}
