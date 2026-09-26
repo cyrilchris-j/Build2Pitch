@@ -3,8 +3,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ideaRollService } from '@/services/api';
 import type { IdeaComplexity, StartupIdea, SubmitOwnIdeaPayload } from '@/types';
 import CinematicBackdrop from '@/components/idea/CinematicBackdrop';
+import Dice3D from '@/components/idea/Dice3D';
+import IdeaCard from '@/components/idea/IdeaCard';
 import LockedScreen from '@/components/idea/LockedScreen';
 import '@/components/idea/ideaStage.css';
+
+const ROLL_DURATION_MS = 2000;
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const INDUSTRY_PRESETS = [
   'EdTech',
@@ -20,13 +25,16 @@ const INDUSTRY_PRESETS = [
   'Open Innovation',
 ];
 
+type PagePhase = 'loading' | 'idle' | 'rolling' | 'revealed' | 'locked';
+
 export const TeamIdeaPage: React.FC = () => {
-  const [loading, setLoading] = useState(true);
+  const [phase, setPhase] = useState<PagePhase>('loading');
+  const [idea, setIdea] = useState<StartupIdea | null>(null);
+  const [attemptsUsed, setAttemptsUsed] = useState(0);
+  const [vaultCount, setVaultCount] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
-  const [lockedIdea, setLockedIdea] = useState<StartupIdea | null>(null);
-  const [options, setOptions] = useState<StartupIdea[]>([]);
-  const [teamName, setTeamName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [flash, setFlash] = useState(false);
 
   // Own Idea Form State
   const [ownTitle, setOwnTitle] = useState('');
@@ -39,56 +47,98 @@ export const TeamIdeaPage: React.FC = () => {
   const [ownComplexity, setOwnComplexity] = useState<IdeaComplexity>('intermediate');
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Load 3 Options or existing locked idea
-  const loadOptions = useCallback(async () => {
-    setError(null);
+  const attemptsRemaining = Math.max(0, 3 - attemptsUsed);
+
+  const loadVault = useCallback(async () => {
     try {
-      const res = await ideaRollService.getOptions();
-      if (res.status === 'LOCKED' && res.selectedIdea) {
-        setLockedIdea(res.selectedIdea);
-        setOptions([]);
-      } else {
-        setLockedIdea(null);
-        setOptions(res.options || []);
-      }
-      if (res.teamName) {
-        setTeamName(res.teamName);
-      }
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } }; message?: string })
-        ?.response?.data?.message || (err as { message?: string })?.message;
-      setError(msg || 'Unable to retrieve problem statements. Please refresh.');
-    } finally {
-      setLoading(false);
+      const res = await ideaRollService.getVault();
+      setVaultCount(res.count);
+    } catch {
+      setVaultCount(null);
     }
   }, []);
 
-  useEffect(() => {
-    loadOptions();
-  }, [loadOptions]);
+  const loadCurrentState = useCallback(async () => {
+    setError(null);
+    try {
+      const state = await ideaRollService.myIdea();
+      if (state.status === 'LOCKED' && state.idea) {
+        setIdea(state.idea);
+        setAttemptsUsed(state.attemptsUsed || 1);
+        setPhase('locked');
+      } else if (state.status === 'ROLLED' && state.idea) {
+        setIdea(state.idea);
+        setAttemptsUsed(state.attemptsUsed || 1);
+        setPhase('revealed');
+      } else {
+        setIdea(null);
+        setAttemptsUsed(0);
+        setPhase('idle');
+      }
+    } catch {
+      setPhase('idle');
+    }
+    loadVault();
+  }, [loadVault]);
 
-  // Select one of the 3 pre-defined problem statement options
-  const handleSelectIdea = async (idea: StartupIdea) => {
-    const ideaId = idea.id || idea._id;
-    if (!ideaId) return;
+  useEffect(() => {
+    loadCurrentState();
+  }, [loadCurrentState]);
+
+  // Roll the dice (up to 3 times)
+  const handleRoll = async () => {
+    if (busy) return;
+    if (attemptsUsed >= 3) {
+      setError('You have used all 3 attempts. Please lock your idea or submit your own idea.');
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    setPhase('rolling');
+
+    try {
+      const [res] = await Promise.all([ideaRollService.roll(), sleep(ROLL_DURATION_MS)]);
+      setIdea(res.idea);
+      setAttemptsUsed(res.attempt);
+
+      // Trigger reveal flash
+      setFlash(true);
+      setTimeout(() => setFlash(false), 600);
+
+      setPhase('revealed');
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response
+          ?.data?.message || (err as { message?: string })?.message;
+      setError(msg || 'Roll failed. Please try again.');
+      setPhase(idea ? 'revealed' : 'idle');
+    } finally {
+      setBusy(false);
+      loadVault();
+    }
+  };
+
+  // Lock the current rolled idea
+  const handleLock = async () => {
+    if (busy || !idea) return;
 
     const confirmed = window.confirm(
-      `Are you sure you want to select "${idea.title}"?\n\nThis problem statement will be exclusively locked to your team and unavailable to any other team.`
+      `Are you sure you want to permanently lock "${idea.title}"?\n\nOnce locked, this problem statement is exclusively assigned to your team and cannot be changed or re-rolled.`
     );
     if (!confirmed) return;
 
     setBusy(true);
     setError(null);
     try {
-      const res = await ideaRollService.selectIdea(ideaId);
-      setLockedIdea(res.idea);
-      setOptions([]);
+      const res = await ideaRollService.lock();
+      setIdea(res.idea);
+      setPhase('locked');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } }; message?: string })
-        ?.response?.data?.message || (err as { message?: string })?.message;
-      setError(msg || 'Selection failed. The idea might have just been chosen by another team.');
-      // Refresh options to give fresh unassigned pool
-      await loadOptions();
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response
+          ?.data?.message || (err as { message?: string })?.message;
+      setError(msg || 'Could not lock idea. Connection lost.');
     } finally {
       setBusy(false);
     }
@@ -101,7 +151,7 @@ export const TeamIdeaPage: React.FC = () => {
 
     const activeIndustry = ownIndustry === 'Custom' ? customIndustry.trim() : ownIndustry.trim();
 
-    // Validate mandatory fields
+    // Mandatory fields check
     if (!ownTitle.trim()) {
       setFormError('Startup / Idea Title is mandatory.');
       return;
@@ -141,12 +191,13 @@ export const TeamIdeaPage: React.FC = () => {
     setBusy(true);
     try {
       const res = await ideaRollService.submitOwnIdea(payload);
-      setLockedIdea(res.idea);
-      setOptions([]);
+      setIdea(res.idea);
+      setPhase('locked');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } }; message?: string })
-        ?.response?.data?.message || (err as { message?: string })?.message;
-      setFormError(msg || 'Failed to submit own idea. Please check the inputs and try again.');
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response
+          ?.data?.message || (err as { message?: string })?.message;
+      setFormError(msg || 'Failed to submit own idea. Please verify inputs and try again.');
     } finally {
       setBusy(false);
     }
@@ -155,14 +206,13 @@ export const TeamIdeaPage: React.FC = () => {
   return (
     <div className="stage">
       <CinematicBackdrop />
+      {flash && <div className="reveal-flash" />}
 
       <header className="title-block">
         <h1 className="brand">
           BUILD<span className="brand-accent">2</span>PITCH
         </h1>
-        <p className="tagline">
-          {teamName ? `Team: ${teamName} • Problem Statement Selection` : 'Problem Statement Selection'}
-        </p>
+        <p className="tagline">Interactive Dice Roll & Idea Selection</p>
         <div className="rule" />
       </header>
 
@@ -172,11 +222,12 @@ export const TeamIdeaPage: React.FC = () => {
           position: 'relative',
           zIndex: 10,
           paddingTop: '3vh',
-          paddingBottom: '12vh',
+          paddingBottom: '14vh',
         }}
       >
         <AnimatePresence mode="wait">
-          {loading ? (
+          {/* Phase 1: Loading */}
+          {phase === 'loading' && (
             <motion.div
               key="loading"
               initial={{ opacity: 0 }}
@@ -194,168 +245,216 @@ export const TeamIdeaPage: React.FC = () => {
                   color: 'var(--silver-2)',
                 }}
               >
-                INITIALIZING PROBLEM CATALOG...
+                INITIALIZING STARTUP VAULT...
               </p>
             </motion.div>
-          ) : lockedIdea ? (
+          )}
+
+          {/* Phase 2: Locked State */}
+          {phase === 'locked' && (
             <motion.div
               key="locked"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <LockedScreen idea={lockedIdea} />
+              <LockedScreen idea={idea} />
             </motion.div>
-          ) : (
+          )}
+
+          {/* Phase 3: Dice Rolling or Idle / Revealed Selection Stage */}
+          {(phase === 'idle' || phase === 'rolling' || phase === 'revealed') && (
             <motion.div
-              key="selection"
-              className="options-container"
-              initial={{ opacity: 0, y: 16 }}
+              key="active-stage"
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
+              style={{ width: 'min(1100px, 94vw)', margin: '0 auto' }}
             >
-              {/* Header Info */}
-              <div className="options-header">
-                <span className="options-badge">
-                  ✦ 3 Problem Options Available • Exclusive Lock Guaranteed ✦
-                </span>
-                <h2 className="options-headline">Select Your Startup Challenge</h2>
-                <p className="options-sub">
-                  Choose one of the 3 curated problem statements below, or pitch your team’s own original
-                  idea. Once selected, your problem statement is{' '}
-                  <strong style={{ color: 'var(--blood-bright)' }}>permanently locked</strong> and
-                  cannot be taken by any other team.
-                </p>
+              {/* Header Status & Attempts Indicator */}
+              <div style={{ textAlign: 'center', marginBottom: 28 }}>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '8px 20px',
+                    borderRadius: 999,
+                    background: 'rgba(230, 57, 70, 0.12)',
+                    border: '1px solid rgba(230, 57, 70, 0.35)',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 11,
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  <span style={{ color: 'var(--silver-2)' }}>Attempts:</span>
+                  <span style={{ color: 'var(--blood-bright)', fontWeight: 800 }}>
+                    {attemptsUsed} / 3 Used
+                  </span>
+                  <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
+                  <span style={{ color: '#ffd166', fontWeight: 700 }}>
+                    {attemptsRemaining} {attemptsRemaining === 1 ? 'Roll' : 'Rolls'} Remaining
+                  </span>
+                  {vaultCount !== null && (
+                    <>
+                      <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
+                      <span style={{ color: 'var(--silver-2)' }}>Vault: {vaultCount} Available</span>
+                    </>
+                  )}
+                </div>
 
                 {error && (
-                  <div
-                    className="error-banner"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 12,
-                      marginTop: 20,
-                    }}
-                  >
-                    <span>⚠️ {error}</span>
-                    <button
-                      onClick={loadOptions}
-                      disabled={busy}
-                      style={{
-                        padding: '6px 14px',
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        border: '1px solid rgba(255, 255, 255, 0.25)',
-                        borderRadius: 6,
-                        color: '#fff',
-                        cursor: 'pointer',
-                        fontSize: 12,
-                        fontFamily: 'var(--font-display)',
-                      }}
-                    >
-                      Refresh Options
-                    </button>
+                  <div className="error-banner" style={{ marginTop: 16 }}>
+                    ⚠️ {error}
                   </div>
                 )}
               </div>
 
-              {/* 3 Problem Statement Cards Grid */}
-              <div className="idea-grid">
-                {options.map((opt, idx) => (
-                  <div key={opt.id || opt._id || idx} className="problem-card">
-                    <div>
-                      {/* Top Badges */}
-                      <div className="problem-card-top">
-                        <span className="pill-category">
-                          {opt.industry || opt.category || 'Innovation'}
-                        </span>
-                        <span className="pill-complexity">
-                          {(opt.complexityLevel || opt.difficulty || 'Intermediate').toUpperCase()}
-                        </span>
-                      </div>
+              {/* 3D Dice Display */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 24,
+                  marginBottom: 36,
+                }}
+              >
+                <Dice3D rolling={phase === 'rolling'} />
 
-                      {/* Title */}
-                      <h3 className="problem-card-title">{opt.title}</h3>
+                {/* Idle Mode: Initial Roll Button */}
+                {phase === 'idle' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ textAlign: 'center' }}
+                  >
+                    <button
+                      className="btn"
+                      onClick={handleRoll}
+                      disabled={busy}
+                      style={{ fontSize: 13, letterSpacing: '0.22em' }}
+                    >
+                      <span>🎲 ROLL THE DICE (3 ATTEMPTS)</span>
+                    </button>
+                    <p
+                      style={{
+                        marginTop: 14,
+                        fontSize: 13,
+                        color: 'var(--silver-2)',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      Roll to reveal your startup challenge. Each roll draws a{' '}
+                      <strong style={{ color: '#ffffff' }}>unique, different problem</strong> from
+                      the available vault.
+                    </p>
+                  </motion.div>
+                )}
 
-                      {/* Problem Statement (Full content visible upfront) */}
-                      <p className="problem-card-desc">{opt.problemStatement}</p>
+                {/* Rolling Mode: Spinner text */}
+                {phase === 'rolling' && (
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 12,
+                      letterSpacing: '0.28em',
+                      color: 'var(--blood-bright)',
+                      animation: 'pulse 1s infinite alternate',
+                    }}
+                  >
+                    ✦ DRAWING RANDOM PROBLEM STATEMENT FROM VAULT... ✦
+                  </p>
+                )}
 
-                      {/* Target Audience Box */}
-                      <div className="problem-meta-box">
-                        <div className="problem-meta-label">Target Audience</div>
-                        <div className="problem-meta-val">
-                          {opt.targetAudience || opt.targetUsers || 'Not specified'}
-                        </div>
-                      </div>
+                {/* Revealed Mode: Display Revealed Problem Card with All Information */}
+                {phase === 'revealed' && idea && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 24,
+                      width: '100%',
+                    }}
+                  >
+                    {/* Full Idea Card Component */}
+                    <IdeaCard idea={idea} />
 
-                      {/* Revenue Model Box */}
-                      <div className="problem-meta-box">
-                        <div className="problem-meta-label">Revenue Model & Monetization</div>
-                        <div className="problem-meta-val" style={{ color: '#ffd166' }}>
-                          {opt.revenueModel || 'Subscription / Transaction fee / Commission'}
-                        </div>
-                      </div>
+                    {/* Action Buttons: Lock vs Roll Again */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 16,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: '100%',
+                        maxWidth: 620,
+                      }}
+                    >
+                      <button
+                        className="btn-select-idea"
+                        onClick={handleLock}
+                        disabled={busy}
+                        style={{
+                          flex: '1 1 240px',
+                          padding: '16px 24px',
+                          fontSize: 13,
+                        }}
+                      >
+                        <span>🔒 LOCK THIS PROBLEM STATEMENT</span>
+                      </button>
 
-                      {/* Key Features */}
-                      {opt.keyFeatures && opt.keyFeatures.length > 0 && (
-                        <div className="problem-features-list">
-                          {opt.keyFeatures.map((feat, fIdx) => (
-                            <span key={fIdx} className="problem-feature-tag">
-                              • {feat}
-                            </span>
-                          ))}
-                        </div>
+                      {attemptsRemaining > 0 && (
+                        <button
+                          className="btn"
+                          onClick={handleRoll}
+                          disabled={busy}
+                          style={{
+                            flex: '1 1 240px',
+                            padding: '16px 24px',
+                            fontSize: 13,
+                          }}
+                        >
+                          <span>🎲 ROLL AGAIN ({attemptsRemaining} LEFT)</span>
+                        </button>
                       )}
                     </div>
 
-                    {/* Select & Lock Button */}
-                    <button
-                      className="btn-select-idea"
-                      disabled={busy}
-                      onClick={() => handleSelectIdea(opt)}
-                      title="Select and lock this problem statement exclusively for your team"
-                    >
-                      <span>🔒 Select & Lock This Idea</span>
-                    </button>
-                  </div>
-                ))}
-
-                {options.length === 0 && (
-                  <div
-                    style={{
-                      gridColumn: '1 / -1',
-                      textAlign: 'center',
-                      padding: 40,
-                      background: 'rgba(255,255,255,0.02)',
-                      borderRadius: 12,
-                      border: '1px dashed rgba(255,255,255,0.1)',
-                    }}
-                  >
-                    <p style={{ color: 'var(--silver-2)', fontSize: 16 }}>
-                      No available pre-defined problem statements currently in vault.
-                    </p>
-                    <button
-                      onClick={loadOptions}
-                      className="btn"
-                      style={{ marginTop: 16 }}
-                      disabled={busy}
-                    >
-                      <span>Refresh Catalog</span>
-                    </button>
-                  </div>
+                    {attemptsRemaining === 0 && (
+                      <p
+                        style={{
+                          fontFamily: 'var(--font-display)',
+                          fontSize: 11,
+                          letterSpacing: '0.2em',
+                          color: '#ffd166',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        ✦ All 3 rolls used. Lock this problem statement above, or pitch your own idea
+                        below. ✦
+                      </p>
+                    )}
+                  </motion.div>
                 )}
               </div>
 
               {/* ─── OWN IDEA SUBMISSION SECTION ─── */}
-              <div className="own-idea-card">
+              <div className="own-idea-card" style={{ marginTop: 40 }}>
                 <div className="own-idea-header">
                   <div>
-                    <span className="own-idea-badge">✦ Original Concept ✦</span>
+                    <span className="own-idea-badge">✦ Alternative Option ✦</span>
                     <h3 className="own-idea-title">Submit Your Own Startup Idea</h3>
                     <p className="own-idea-desc">
-                      Prefer to solve an original challenge? Complete all mandatory fields below to
-                      register and lock your unique problem statement.
+                      Have an original concept or challenge of your own? Fill in the basic mandatory
+                      information below to register and exclusively lock your custom idea for your
+                      team.
                     </p>
                   </div>
                 </div>
@@ -430,7 +529,7 @@ export const TeamIdeaPage: React.FC = () => {
                       <input
                         type="text"
                         className="own-form-input"
-                        placeholder="e.g., College students, Local retailers, Remote workers"
+                        placeholder="e.g., College students, Local shopkeepers, Freelancers"
                         value={ownAudience}
                         onChange={(e) => setOwnAudience(e.target.value)}
                         disabled={busy}
@@ -446,7 +545,7 @@ export const TeamIdeaPage: React.FC = () => {
                       <input
                         type="text"
                         className="own-form-input"
-                        placeholder="e.g., 5% Commission per order, Monthly SaaS subscription ($15/mo)"
+                        placeholder="e.g., 5% Commission per transaction, $12/month SaaS tier"
                         value={ownRevenue}
                         onChange={(e) => setOwnRevenue(e.target.value)}
                         disabled={busy}
@@ -477,7 +576,7 @@ export const TeamIdeaPage: React.FC = () => {
                       <input
                         type="text"
                         className="own-form-input"
-                        placeholder="e.g., Real-time inventory, WhatsApp notifications, Instant payments"
+                        placeholder="e.g., Real-time inventory tracking, AI recommendation, UPI checkout"
                         value={ownFeatures}
                         onChange={(e) => setOwnFeatures(e.target.value)}
                         disabled={busy}
@@ -491,7 +590,7 @@ export const TeamIdeaPage: React.FC = () => {
                       </label>
                       <textarea
                         className="own-form-textarea"
-                        placeholder="Clearly explain the real-world problem you are addressing, why it matters, and who is suffering from this issue..."
+                        placeholder="Describe the problem, the specific pain points of your target audience, and why existing solutions are inadequate..."
                         value={ownProblem}
                         onChange={(e) => setOwnProblem(e.target.value)}
                         rows={4}
@@ -501,7 +600,7 @@ export const TeamIdeaPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Submission Row */}
+                  {/* Submit Button Row */}
                   <div
                     style={{
                       marginTop: 26,
@@ -522,8 +621,8 @@ export const TeamIdeaPage: React.FC = () => {
                         letterSpacing: '0.12em',
                       }}
                     >
-                      <span className="required-star">*</span> All highlighted fields are mandatory
-                      before submission.
+                      <span className="required-star">*</span> Mandatory fields: Title, Industry
+                      Track, Problem Statement, Target Audience, Revenue Model.
                     </span>
 
                     <button type="submit" className="btn-submit-own" disabled={busy}>
