@@ -144,6 +144,23 @@ export interface LockedIdeaResult {
   idea: StartupIdea;
 }
 
+export interface TeamIdeaOptionsResponse {
+  status: 'LOCKED' | 'SELECTING';
+  options: StartupIdea[];
+  selectedIdea: StartupIdea | null;
+  teamName?: string;
+}
+
+export interface SubmitOwnIdeaPayload {
+  title: string;
+  industry: string;
+  problemStatement: string;
+  targetAudience: string;
+  revenueModel: string;
+  keyFeatures?: string[];
+  complexityLevel?: IdeaComplexity;
+}
+
 // ==========================================
 // 5. Idea Assignment Types
 // ==========================================

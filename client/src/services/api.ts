@@ -8,7 +8,9 @@ import type {
   LockedIdeaResult,
   MyIdeaState,
   RegisterPayload,
+  SubmitOwnIdeaPayload,
   Team,
+  TeamIdeaOptionsResponse,
   User,
 } from '@/types';
 
@@ -175,6 +177,18 @@ export const teamService = {
 
 // ─── Idea Roll Service ────────────────────────────────────────────────────────
 export const ideaRollService = {
+  getOptions: async (): Promise<TeamIdeaOptionsResponse> => {
+    const res = await apiClient.get<ApiResponse<TeamIdeaOptionsResponse>>('/ideas/options');
+    return res.data.data as TeamIdeaOptionsResponse;
+  },
+  selectIdea: async (ideaId: string): Promise<LockedIdeaResult> => {
+    const res = await apiClient.post<ApiResponse<LockedIdeaResult>>('/ideas/select', { ideaId });
+    return res.data.data as LockedIdeaResult;
+  },
+  submitOwnIdea: async (data: SubmitOwnIdeaPayload): Promise<LockedIdeaResult> => {
+    const res = await apiClient.post<ApiResponse<LockedIdeaResult>>('/ideas/own-idea', data);
+    return res.data.data as LockedIdeaResult;
+  },
   getVault: async (): Promise<IdeaVault> => {
     const res = await apiClient.get<ApiResponse<IdeaVault>>('/ideas/available');
     return res.data.data as IdeaVault;

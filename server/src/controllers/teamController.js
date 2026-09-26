@@ -354,16 +354,18 @@ exports.getAssignedIdea = async (req, res) => {
       return successResponse(res, null, 'No team found');
     }
 
-    // Check IdeaAssignment collection
+    // Check IdeaAssignment collection or team.ideaAssignment
     const assignment = await IdeaAssignment.findOne({
       teamId: team._id.toString(),
     }).lean();
 
-    if (!assignment) {
+    const ideaId = assignment?.ideaId || team.ideaAssignment?.ideaId;
+
+    if (!ideaId) {
       return successResponse(res, null, 'No idea assigned yet');
     }
 
-    const idea = await StartupIdea.findById(assignment.ideaId).lean();
+    const idea = await StartupIdea.findById(ideaId).lean();
     if (!idea) {
       return successResponse(res, null, 'Assigned idea not found');
     }
@@ -373,13 +375,18 @@ exports.getAssignedIdea = async (req, res) => {
       {
         ideaId: idea._id.toString(),
         title: idea.title,
-        industry: idea.category || '',
+        industry: idea.industry || idea.category || '',
+        category: idea.category || idea.industry || '',
         shortDescription: idea.shortDescription || '',
         problemStatement: idea.problemStatement || '',
         targetUsers: idea.targetUsers || idea.targetAudience || '',
+        targetAudience: idea.targetAudience || idea.targetUsers || '',
+        revenueModel: idea.revenueModel || '',
+        keyFeatures: idea.keyFeatures || [],
+        complexityLevel: idea.complexityLevel || 'intermediate',
         difficulty: idea.difficulty || '',
-        status: assignment.status,
-        selectedAt: assignment.selectedAt,
+        status: assignment?.status || (team.ideaAssignment?.isRevealed ? 'LOCKED' : 'SELECTING'),
+        selectedAt: assignment?.selectedAt || team.ideaAssignment?.assignedAt,
       },
       'Assigned idea retrieved'
     );

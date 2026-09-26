@@ -12,10 +12,16 @@ const ideaAssignmentSchema = new mongoose.Schema(
     ideaId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'StartupIdea',
-      required: true,
+      default: null,
     },
+    candidateIdeaIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'StartupIdea',
+      },
+    ],
     attemptsUsed: { type: Number, default: 0, min: 0, max: 2 },
-    status: { type: String, enum: ['ROLLED', 'LOCKED'], default: 'ROLLED' },
+    status: { type: String, enum: ['SELECTING', 'ROLLED', 'LOCKED'], default: 'SELECTING' },
     selectedAt: { type: Date, default: null },
   },
   {

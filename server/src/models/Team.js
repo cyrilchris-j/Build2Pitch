@@ -54,6 +54,7 @@ const teamSchema = new mongoose.Schema(
       assignedAt: Date,
       isRevealed: { type: Boolean, default: false },
       revealTime: Date,
+      candidateIdeaIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StartupIdea' }],
     },
     submissionId: {
       type: mongoose.Schema.Types.ObjectId,
